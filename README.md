@@ -1,6 +1,5 @@
 # GPT Keylogger
 This is the official repository for the code used in the paper: "What Was Your Prompt? A Remote Keylogging Attack on AI Assistants", USENIX Security 24'
-
 https://arxiv.org/abs/2403.09751
 # Description
 We unveil a novel side-channel that can be used to read encrypted responses from AI Assistants over the web: the token-length side-channel. 
