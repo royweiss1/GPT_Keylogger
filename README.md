@@ -7,3 +7,5 @@ The attack relays on the fact that LLM Services sends their responses to the use
 With this information in hand we show how a model can be trained to infer the topic of the asked response.
 
 # Usage
+### Plug And Play ###
+We offer a plug and play Jupyter Notebook - Demonstration.ipynb. There you can simply enter the packet sizes from the pcap file. Then the model will generate to you the responses sorted by the model's confidence score.
