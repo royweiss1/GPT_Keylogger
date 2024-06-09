@@ -1,6 +1,8 @@
 # GPT Keylogger
 This is the official repository for the code used in the paper: "What Was Your Prompt? A Remote Keylogging Attack on AI Assistants", USENIX Security 24'
 https://arxiv.org/abs/2403.09751
+![image](https://github.com/royweiss1/GPT_Keylogger/assets/92648019/9c9f1bce-1bf2-4f02-902d-47249bf48a9c)
+
 # Description
 Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**...
 
