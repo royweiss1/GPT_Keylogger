@@ -7,5 +7,11 @@ The attack relays on the fact that LLM Services sends their responses to the use
 With this information in hand we show how a model can be trained to infer the topic of the asked response.
 
 # Usage
-### Plug And Play ###
+### Plug and Play ###
 We offer a plug and play Jupyter Notebook - Demonstration.ipynb. There you can simply enter the packet sizes from the pcap file. Then the model will generate to you the responses sorted by the model's confidence score.
+
+### Generation ###
+In order to generate the responses on a full scale you can use generate.py. There a user can generate full paragraphs using the models we have fine-tuned (which are hosted on Huggingface).
+
+### Evaluate ###
+We have also included a jupyter notebook with all of the relevant metrics in order to fully evaluate the generated paragraphs/sentneces. The notebook includes both text analysis metrics such as Rouge and Edit Distance and Topic analysis using Sentence Transformer's embeddings cosine simularity. 
