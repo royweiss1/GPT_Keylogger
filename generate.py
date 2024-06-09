@@ -148,9 +148,7 @@ def generate_first_custom(csv_file_path="data/test_splitted.csv", checkpoint_int
     for batch in tqdm(batch_split[batch_count:], desc="batch progress: "):  # batch is a list
         sentences_generated = generate_first(batch)
         for index, sentences in enumerate(sentences_generated):
-            original_index = batch_count * BATCH_SIZE + index
-            generated = sentences  # Assuming the top prediction is the first one
-            generated_results.append(generated)
+            generated_results.append(sentences[index])
 
         batch_count += 1
         
@@ -190,7 +188,6 @@ Filter = 16
 def generate_with_context(encodings):
     inputs = context_tokenizer(encodings, max_length=MAX_LENGTH, padding=True, truncation=True, return_tensors="pt")
     
-    all_predictions = []
     batch = {key: value.to(accelerator.device) for key, value in inputs.items()}
     outputs = context_model.generate(**batch,
                                      max_length=MAX_LENGTH,
@@ -205,34 +202,17 @@ def generate_with_context(encodings):
                                      num_return_sequences=NUM_OF_OUTPUTS)
     sequences = outputs.sequences
     sequence_scores = outputs.sequences_scores
+
+    # Find the index of the highest scoring sequence for the current example
+    top_index = sequence_scores.argmax().item()
     
-    # Determine the number of input examples
-    batch_size = 1
+    # Extract the highest scoring sequence
+    top_sequence = sequences[top_index]
     
-    # Extract the highest scoring sequence for each example in the batch
-    for i in range(batch_size):
-        start_idx = i * NUM_OF_OUTPUTS
-        end_idx = (i + 1) * NUM_OF_OUTPUTS
-        
-        # Get the sequences and scores for the current example
-        current_sequences = sequences[start_idx:end_idx]
-        current_scores = sequence_scores[start_idx:end_idx]
-        
-        # Find the index of the highest scoring sequence for the current example
-        top_index = current_scores.argmax().item()
-        
-        # Extract the highest scoring sequence
-        top_sequence = current_sequences[top_index]
-        
-        # Convert the top sequence to a readable format (e.g., string)
-        top_text = context_tokenizer.decode(top_sequence, skip_special_tokens=True)
-        
-        # Add the top text to the list of all predictions
-        all_predictions.append(top_text)
-
-    return all_predictions[0]
-
-
+    # Convert the top sequence to a readable format (e.g., string)
+    top_text = context_tokenizer.decode(top_sequence, skip_special_tokens=True)
+    
+    return top_text
 
 def make_input_with_context(special_tokens, context):
     return f'Translate the Special Tokens to English, given the context. \nContext: {context} \nSpecial Tokens:{special_tokens}'
@@ -259,10 +239,9 @@ def generate_first_custom_with_context(start_idx, end_idx=None, csv_file_path="d
             if sentence_col in test_set.columns and str(test_set.at[idx, sentence_col]) != "nan":
                 current_sentence = test_set.at[idx, sentence_col]
                 input_data = make_input_with_context(encoding_lengths(current_sentence), previous_generated)
-                generated_sentences = generate_with_context(input_data)
+                generated_sentence = generate_with_context(input_data)
 
-                if len(generated_sentences) > 0:
-                    generated_sentence = generated_sentences
+                if len(generated_sentence) > 0: # if not blank
                     previous_generated = generated_sentence
                     test_set.at[idx, generated_col] = generated_sentence
 
