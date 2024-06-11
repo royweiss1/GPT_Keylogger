@@ -2,13 +2,13 @@
 In this repository you will find a python implementation of GPT Keylogger, a tool used for decyphering encrypted LLM's responses over the web.
 
 This is the official repository for the code used in the paper:
-*["What Was Your Prompt? A Remote Keylogging Attack on AI Assistants"](https://arxiv.org/abs/2403.09751), USENIX Security 24'
+["What Was Your Prompt? A Remote Keylogging Attack on AI Assistants"](https://arxiv.org/abs/2403.09751), USENIX Security 24'
 
 *Weiss R, Ayzenshteyn D, Amit G, Mirsky Y "What Was Your Prompt? A Remote Keylogging Attack on AI Assistants", USNIX Security 24*
 If you use any derivative of this code in your work, please cite our publicaiton. You may use the TODO FILL AT THE END BIBTEX
 
 For more details you view our paper:
-* ["here"](https://arxiv.org/abs/2403.09751)
+["here"](https://arxiv.org/abs/2403.09751)
 
 # Description
 Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**...
@@ -23,9 +23,12 @@ With this information in hand we show how a model can be trained to infer the to
 
 
 ## Setup
-  $ pip install https://github.com/royweiss1/GPT_Keylogger/archive/master.zip
-  $ cd GPT_Keylogger
-  $ pip install -r requirments.txt
+```
+pip install https://github.com/royweiss1/GPT_Keylogger.git
+cd GPT_Keylogger
+pip install -r requirments.txt
+```
+
 
 ## Usage
 In this repository we offer a CLI tool capabale of:
@@ -54,3 +57,13 @@ In order to generate the responses on a full scale you can use generate.py. Ther
 
 ### Evaluate ###
 We have also included a jupyter notebook with all of the relevant metrics in order to fully evaluate the generated paragraphs/sentneces. The notebook includes both text analysis metrics such as Rouge and Edit Distance and Topic analysis using Sentence Transformer's embeddings cosine simularity. 
+
+
+
+<!-- LICENSE -->
+## License
+
+Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
