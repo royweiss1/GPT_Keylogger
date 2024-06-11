@@ -1,3 +1,5 @@
+<a name="readme-top"></a>
+
 # GPT Keylogger
 In this repository you will find a python implementation of GPT Keylogger, a tool used for decyphering encrypted LLM's responses over the web.
 
