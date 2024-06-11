@@ -10,7 +10,7 @@ This is the official repository for the code used in the paper:
 If you use any derivative of this code in your work, please cite our publicaiton. You may use the TODO FILL AT THE END BIBTEX
 
 For more details you view our paper:
-["here"](https://arxiv.org/abs/2403.09751)
+[here](https://arxiv.org/abs/2403.09751)
 
 # Description
 Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**...
