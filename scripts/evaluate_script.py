@@ -14,12 +14,7 @@ def format_floats(float_list):
     return [float(f"{num:.3f}") for num in float_list]
 
 
-def compute_metrics(reference_sentence, sentence_to_compare):
-    accelerator = Accelerator(cpu=False)
-    torch.cuda.empty_cache()
-    print("-------Device:", accelerator.device, "-------")
-    model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
-    model_sentence_transformers = model_sentence_transformers.to(accelerator.device) 
+def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to_compare):
 
     embed_pred = model_sentence_transformers.encode([sentence_to_compare], convert_to_tensor=True)
     embed_reference = model_sentence_transformers.encode([reference_sentence], convert_to_tensor=True)
@@ -41,11 +36,18 @@ def compute_metrics(reference_sentence, sentence_to_compare):
     ref_set, comp_set = set(ref.split()), set(comp.split())
     jac = float(len(ref_set & comp_set)) / len(ref_set | comp_set)
         
-    return format_floats([cosine_score, rouge_1, rouge_L, ed, jac])
+    return format_floats([cosine_score[0], rouge_1, rouge_L, ed, jac])
 
 
 def calculate_scores(csv_file_path, output_pickle_path, start_idx=0, end_idx=None, checkpoint_interval=500):
     # Load the combined CSV file
+    accelerator = Accelerator(cpu=False)
+    torch.cuda.empty_cache()
+    print("-------Device:", accelerator.device, "-------")
+    model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
+    model_sentence_transformers = model_sentence_transformers.to(accelerator.device) 
+
+
     df = pd.read_csv(csv_file_path)
 
     # Determine the end index if not provided
@@ -76,7 +78,7 @@ def calculate_scores(csv_file_path, output_pickle_path, start_idx=0, end_idx=Non
                     ref_combined = "".join(reference_para)
                     gen_combined = "".join(generated_para)
 
-                    scores = compute_metrics(ref_combined, gen_combined)
+                    scores = compute_metrics(model_sentence_transformers, ref_combined, gen_combined)
                     row_other_scores.append(scores)
         
         all_other_scores.append(row_other_scores)
@@ -102,8 +104,8 @@ def read_and_print_pickle(pickle_file_path):
     # Print the contents of the pickle file
     firsts = [row[0] for row in data]
 
-    print(f"Attack Success Rate, first Sentences: {sum(1 for number in firsts if number > 0.5) / len(firsts) * 100:.2f}%")
-    print(f"Precentege of almost Identical Decyphering, first Sentences: {sum(1 for number in firsts if number > 0.9) / len(firsts) * 100:.2f}%")
+    print(f"Attack Success Rate, first Sentences: {sum(1 for number in firsts if number[0] > 0.5) / len(firsts) * 100:.2f}%")
+    print(f"Precentege of almost Identical Decyphering, first Sentences: {sum(1 for number in firsts if number[0] > 0.9) / len(firsts) * 100:.2f}%")
 
 # read_and_print_pickle("scores.pkl")
 

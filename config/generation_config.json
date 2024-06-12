@@ -4,7 +4,7 @@
     "BATCH_SIZE": 8,
 
     "evaluate": true,
-    "generated_metrics_path": "generated_results.pickle",
+    "generated_metrics_path": "data/generated_results.pickle",
 
     "first_sentences_generation_config": {
         "first_sentences_model_name": "royweiss1/T5_FirstSentences",
