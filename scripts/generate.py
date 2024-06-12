@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, logging
 import pandas as pd
 from accelerate import Accelerator
 from tqdm import tqdm
@@ -10,14 +10,14 @@ import json
 import sys
 
 import scripts.evaluate_script as evaluate_script
-
+logging.set_verbosity_error()
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def validate_and_read_config(config_path):
     required_fields = {
         "test_dataset_path": str,
-        "generated_output_path": str,
+        "generated_path": str,
         "BATCH_SIZE": int,
 
         "evaluate": bool,
@@ -63,7 +63,7 @@ def validate_and_read_config(config_path):
         raise FileNotFoundError(f"The file '{config_path}' does not exist.")
 
     with open(config_path, 'r') as file:
-        config = json.load(file)
+        config = json.load(file)    
     
     validate_config(config, required_fields)
     
@@ -76,36 +76,41 @@ def data_process(test_dataset_path: str) -> pd.DataFrame:
             raise ValueError("The test dataset must be a JSONL file.")
         test_dataset_path += '.jsonl'
 
-    # Load the JSONL file
     with open(test_dataset_path, 'r') as file:
-        data = [json.loads(line) for line in file]
+        data = json.load(file)
 
+    paragraphs = data['paragraphs']
+    
     rows = []
-    for entry in data:
-        paragraphs = entry['paragraphs']
-        for paragraph in paragraphs:
-            if len(paragraph) < 45:
-                paragraph += [''] * (45 - len(paragraph))
-            rows.append(paragraph)
+    for paragraph in paragraphs:
+        if len(paragraph) < 45:
+            paragraph += [''] * (45 - len(paragraph))
+        else:
+            paragraph = paragraph[:45]
+        rows.append(paragraph)
 
     # Convert the rows to a DataFrame
     df = pd.DataFrame(rows)
+    
 
     # Rename the columns to Sentence_0, Sentence_1, ...
     df.columns = [f'Sentence_{i}' for i in range(45)]
+    new_columns = [f'Generated_{i}' for i in range(45)]
+    for col in new_columns:
+        df[col] = ""
 
     # Save to CSV
     return df
 
 
-def _generate_first(encodings: list[str], model_name: str, MAX_LENGTH: int, top_k: int, num_beam_groups: int,  NUM_OF_OUTPUTS: int, no_repeat_ngram_size: int, diversity_penalty: float): # |encodings| = BATCH_SIZE
+def _generate_first(encodings: list[str], first_sentences_model_name: str, MAX_LENGTH: int, top_k: int, num_beam_groups: int,  num_beams: int, no_repeat_ngram_size: int, diversity_penalty: float): # |encodings| = BATCH_SIZE
 
-    first_model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-    first_tokenizer = AutoTokenizer.from_pretrained(model_name)
+    first_model = AutoModelForSeq2SeqLM.from_pretrained(first_sentences_model_name)
+    first_tokenizer = AutoTokenizer.from_pretrained(first_sentences_model_name)
 
     accelerator = Accelerator(cpu=False)
     torch.cuda.empty_cache()
-    print("--------- Device:", accelerator.device, "---------")
+    # print("--------- Device:", accelerator.device, "---------")
     first_model = first_model.to(accelerator.device)
 
     all_predictions = []
@@ -123,9 +128,9 @@ def _generate_first(encodings: list[str], model_name: str, MAX_LENGTH: int, top_
         no_repeat_ngram_size=no_repeat_ngram_size,
         top_k=top_k,
         num_beam_groups=num_beam_groups,
-        num_beams=NUM_OF_OUTPUTS,
+        num_beams=num_beams,
         diversity_penalty=diversity_penalty,
-        num_return_sequences=NUM_OF_OUTPUTS
+        num_return_sequences=num_beams
     )
 
     sequences = outputs.sequences
@@ -134,8 +139,8 @@ def _generate_first(encodings: list[str], model_name: str, MAX_LENGTH: int, top_
     batch_size = len(encodings)
     
     for i in range(batch_size):
-        start_idx = i * NUM_OF_OUTPUTS
-        end_idx = (i + 1) * NUM_OF_OUTPUTS
+        start_idx = i * num_beams
+        end_idx = (i + 1) * num_beams
         
         current_sequences = sequences[start_idx:end_idx]
         current_scores = sequence_scores[start_idx:end_idx]
@@ -145,7 +150,6 @@ def _generate_first(encodings: list[str], model_name: str, MAX_LENGTH: int, top_
         top_text = first_tokenizer.decode(top_sequence, skip_special_tokens=True)
         
         all_predictions.append(top_text)
-
     return all_predictions
 
 
@@ -168,51 +172,46 @@ def create_batches(lst: list, BATCH_SIZE: int):
     return [lst[i:i + BATCH_SIZE] for i in range(0, len(lst), BATCH_SIZE)]
 
 
-def generate_first_custom(test_set: pd.DataFrame, generated_results_path: str, generate_config: dict, checkpoint_interval=50):
+def generate_first_custom(test_set: pd.DataFrame, batch_size: int, generated_path: str, generate_config: dict, checkpoint_interval=50):
     # Load the test set
+    test_set = test_set[test_set['Sentence_0'] != "nan"]
+    test_set.to_csv(generated_path, index=False)
+
     all_first_sentences = list(test_set["Sentence_0"])
     first_sentences_inputs = []
 
     for sentence in all_first_sentences:
-        if str(sentence) != "nan":
-            first_sentences_inputs.append(make_input(sentence))
+        first_sentences_inputs.append(make_input(sentence))
     
-    batch_split = create_batches(first_sentences_inputs)
+    batch_split = create_batches(first_sentences_inputs, batch_size)
     
     batch_count = 0
-    generated_results = ["Generated_0"]    
+    generated_results = []
+
     for batch in tqdm(batch_split[batch_count:], desc="batch progress: "):  # batch is a list
         sentences_generated = _generate_first(batch, **generate_config)
-        for index, sentences in enumerate(sentences_generated):
-            generated_results.append(sentences[index])
-
+        generated_results += sentences_generated  # list batch_size long
+    
         batch_count += 1
-        
-        # Save checkpoint
         if batch_count % checkpoint_interval == 0:
-            with open(generated_results_path, mode='a', newline='') as file:
-                writer = csv.writer(file)
-                for item in generated_results:
-                    writer.writerow([item])
-            print(f"First Sentences Checkpoint saved at batch {batch_count} to {generated_results_path}")
-            generated_results.clear()  # Clear the list after writing to avoid duplicates
-
-    # Save the final results to the CSV file
-    with open(generated_results_path, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        for item in generated_results:
-            writer.writerow([item])
-    print(f"First Sentences Generated saved to {generated_results_path}")
+            test_set['Generated_0'] = generated_results[:len(test_set)]
+            test_set.to_csv(generated_path, index=False)
+            print(f"Checkpoint saved at {generated_path}")
+    
+    if batch_count % checkpoint_interval != 0:
+        test_set['Generated_0'] = generated_results[:len(test_set)]
+        test_set.to_csv(generated_path, index=False)
+        print(f"Final results saved at {generated_path}")
 
 
 
-def _generate_with_context(encodings: list[str], context_model_name: str, MAX_LENGTH: int, top_k: int, num_beam_groups: int, NUM_OF_OUTPUTS: int, length_penalty: float, no_repeat_ngram_size: int, diversity_penalty: float):
+def _generate_with_context(encodings: list[str], middle_sentences_model_name: str, MAX_LENGTH: int, top_k: int, num_beam_groups: int, num_beams: int, length_penalty: float, no_repeat_ngram_size: int, diversity_penalty: float):
     torch.cuda.empty_cache()
     accelerator = Accelerator(cpu=False)
-    print("--------- Device:", accelerator.device, "---------")
+    # print("--------- Device:", accelerator.device, "---------")
 
-    context_model = AutoModelForSeq2SeqLM.from_pretrained(context_model_name)
-    context_tokenizer = AutoTokenizer.from_pretrained(context_model_name)
+    context_model = AutoModelForSeq2SeqLM.from_pretrained(middle_sentences_model_name)
+    context_tokenizer = AutoTokenizer.from_pretrained(middle_sentences_model_name)
     context_model = context_model.to(accelerator.device)
 
     inputs = context_tokenizer(encodings, max_length=MAX_LENGTH, padding=True, truncation=True, return_tensors="pt")
@@ -226,9 +225,9 @@ def _generate_with_context(encodings: list[str], context_model_name: str, MAX_LE
                         no_repeat_ngram_size=no_repeat_ngram_size,
                         top_k=top_k,
                         num_beam_groups=num_beam_groups,
-                        num_beams=NUM_OF_OUTPUTS,
+                        num_beams=num_beams,
                         diversity_penalty=diversity_penalty,
-                        num_return_sequences=NUM_OF_OUTPUTS)
+                        num_return_sequences=num_beams)
     sequences = outputs.sequences
     sequence_scores = outputs.sequences_scores
 
@@ -243,35 +242,40 @@ def make_input_with_context(sentence, context):
     return f'Translate the Special Tokens to English, given the context. \nContext: {context} \nSpecial Tokens:{_encoding_lengths(sentence)}'
 
 
-def generate_first_custom_with_context(test_set: pd.DataFrame, generated_output_path: str, generate_config: dict, start_idx=0, end_idx=None):
+def generate_first_custom_with_context(generated_output_path: str, generate_config: dict, start_idx=0, end_idx=None):
     # Load the test set
+    test_set = pd.read_csv(generated_output_path)
+    
     if end_idx is None:
         end_idx = len(test_set)
         
-    # Initialize the 'Generated' columns if they don't exist
-    for i in range(len(test_set.columns) - 3):
-        if not any(test_set.columns.str.startswith(f"Generated_{i}")):
-            test_set[f"Generated_{i}"] = ""
-
+    for i in range(len(test_set.columns) // 2):
+        generated_col = f"Generated_{i}"
+        if generated_col in test_set.columns:
+            test_set[generated_col] = test_set[generated_col].astype(str)
+    
     for idx in tqdm(range(start_idx, end_idx), desc="Processing rows: "):
-        previous_generated = test_set.at[idx, "Generated_0"] # mind this should be Generated_0
-        for i in range(1, len(test_set.columns)):
+        previous_generated = test_set.at[idx, "Generated_0"]  # Accessing Generated_0
+
+        for i in range(1, len(test_set.columns) // 2):
             sentence_col = f"Sentence_{i}"
             generated_col = f"Generated_{i}"
 
-            if sentence_col in test_set.columns and str(test_set.at[idx, sentence_col]) != "nan":
+            if sentence_col in test_set.columns and str(test_set.at[idx, sentence_col]) != "nan" and str(test_set.at[idx, sentence_col]) != "":
                 current_sentence = test_set.at[idx, sentence_col]
                 input_data = make_input_with_context(current_sentence, previous_generated)
                 generated_sentence = _generate_with_context(input_data, **generate_config)
-                if len(generated_sentence) > 0: # if not blank
+                
+                if len(generated_sentence) > 0:  # if not blank
                     previous_generated = generated_sentence
                     test_set.at[idx, generated_col] = generated_sentence
-        # After each paragraph, save the results to the CSV file
+            else:
+                break
+
+        # After each row, save the results to the CSV file
         test_set.to_csv(generated_output_path, index=False)
 
-        test_set.to_csv(generated_output_path, index=False)
     print(f"Results saved to {generated_output_path}")
-
 
 
 def main(config_path: str):
@@ -285,10 +289,10 @@ def main(config_path: str):
     try:
         config = validate_and_read_config(config_path)
         test_set = data_process(config["test_dataset_path"])
-        generate_first_custom(test_set, config["generated_output_path"])
-        generate_first_custom_with_context(test_set, config["generated_results_path"], config["middle_sentences_generation_config"])
+        generate_first_custom(test_set, config["BATCH_SIZE"], config["generated_path"], config["first_sentences_generation_config"])
+        generate_first_custom_with_context(config["generated_path"], config["middle_sentences_generation_config"])
         if config["evaluate"]:
-            evaluate_script.main(config["generated_output_path"], config["generated_metrics_path"])
+            evaluate_script.main(config["generated_path"], config["generated_metrics_path"])
 
     except (ValueError, FileNotFoundError) as e:
         print(f"Configuration error: {e}")

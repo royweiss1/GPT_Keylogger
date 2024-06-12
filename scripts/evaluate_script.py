@@ -1,6 +1,6 @@
 import pandas as pd
 import Levenshtein
-import scripts.evaluate_script as evaluate_script
+import evaluate
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 from accelerate import Accelerator
@@ -29,7 +29,7 @@ def compute_metrics(reference_sentence, sentence_to_compare):
     sen_trans_score = cos(embed_pred, embed_reference)
     cosine_score = tuple(sen_trans_score.detach().cpu().numpy())
 
-    rouge = evaluate_script.load('rouge')
+    rouge = evaluate.load('rouge')
     rouge_results = rouge.compute(predictions=[sentence_to_compare], references=[reference_sentence], use_aggregator=False)
     rouge_L = rouge_results["rougeL"][0]
     rouge_1 = rouge_results["rouge1"][0]

@@ -1,13 +1,13 @@
 {
     "test_dataset_path": "data/test.json",
-    "generated_output_path": "",
+    "generated_output_path": "data/generated.csv",
     "BATCH_SIZE": 8,
 
     "evaluate": true,
-    "generated_metrics_path": "",
+    "generated_metrics_path": "generated_results.pickle",
 
     "first_sentences_generation_config": {
-        "first_sentences_model_name": "/royweiss1/T5_FirstSentences",
+        "first_sentences_model_name": "royweiss1/T5_FirstSentences",
         "MAX_LENGTH": 80,
         "top_k": 50,
         "num_beam_groups": 16,
@@ -17,7 +17,7 @@
         "diversity_penalty": 0.8
     },
     "middle_sentences_generation_config": {
-        "middle_sentences_model_name": "/royweiss1/T5_MiddleSentences",
+        "middle_sentences_model_name": "royweiss1/T5_MiddleSentences",
         "MAX_LENGTH": 160,
         "top_k": 50,
         "num_beam_groups": 5,
