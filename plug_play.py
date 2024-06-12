@@ -3,22 +3,21 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from accelerate import Accelerator
 import torch
 
-print("Loading Model and Tokenizer to device...")
-
-MAX_LENGTH = 80
-NUM_OF_OUTPUTS = 32
-BATCH_SIZE = 4
-
-first_model_checkpoint = "royweiss1/T5_FirstSentences"
-first_model = AutoModelForSeq2SeqLM.from_pretrained(first_model_checkpoint)
-first_tokenizer = AutoTokenizer.from_pretrained(first_model_checkpoint)
-
-torch.cuda.empty_cache()
-accelerator = Accelerator(cpu=False)
-print("-------Device:", accelerator.device)
-first_model = first_model.to(accelerator.device)
 
 def generate_first(encodings):
+    print("Loading Model and Tokenizer to device...")
+
+    MAX_LENGTH = 80
+    NUM_OF_OUTPUTS = 32
+
+    first_model_checkpoint = "royweiss1/T5_FirstSentences"
+    first_model = AutoModelForSeq2SeqLM.from_pretrained(first_model_checkpoint)
+    first_tokenizer = AutoTokenizer.from_pretrained(first_model_checkpoint)
+
+    torch.cuda.empty_cache()
+    accelerator = Accelerator(cpu=False)
+    print("-------Device:", accelerator.device)
+    first_model = first_model.to(accelerator.device)
     inputs = first_tokenizer(encodings, max_length=MAX_LENGTH, padding=True, truncation=True, return_tensors="pt")
     inputs = {k: v.to(accelerator.device) for k, v in inputs.items()}
 
@@ -88,10 +87,18 @@ def make_input(lst_lengths):
 
 
 def main():
+    packet_lens = False
+    input_str = input("Please enter the correct number based of the kind of input that you wish to enter: Token Sizes (1) or Packet Lengths (2): ")
+    while input_str != "1" and input_str != "2":
+        input_str = input("Please enter the correct number based of the kind of input that you wish to enter: Token Sizes (1) or Packet Lengths (2): ")
+    if input_str == "2":
+        packet_lens = True
+
     input_str = input("Enter the lengths of the packets divided by comma (,) or -1 if you wish to stop: ")
     while input_str != "-1":
-        lst_of_lengths = [int(x) for x in input_str.split(",")]
-        token_lens = parse_packet_lengths(lst_of_lengths)
+        token_lens = [int(x) for x in input_str.split(",")]
+        if packet_lens:
+            token_lens = parse_packet_lengths(token_lens)
         print("Token lengths:", token_lens)
         print("Generating first sentences...")
         token_lens = heuristic(token_lens)[0] # take the first sentence based on the heuristic
