@@ -3,9 +3,10 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from accelerate import Accelerator
 import torch
 
+print("Loading Model and Tokenizer to device...")
 
 MAX_LENGTH = 80
-NUM_OF_OUTPUTS = 50
+NUM_OF_OUTPUTS = 32
 BATCH_SIZE = 4
 
 first_model_checkpoint = "royweiss1/T5_FirstSentences"

@@ -1,7 +1,11 @@
+print("GPT Keylogger Framework")
+print("Loading...")
+
 import argparse
 import sys
 import os
 import generate
+import plug_play
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Plug & Play. Use the latter for trying the framework out.")
@@ -44,9 +48,7 @@ def main():
         
 
     elif args.play:
-        print("Playing mode activated.")
-        # Add your play mode code here
-
+        plug_play.main()
 
 
 
