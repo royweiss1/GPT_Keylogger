@@ -34,12 +34,38 @@ pip install -r requirments.txt
 
 ## Usage
 In this repository we offer a CLI tool capabale of:
-1) Plug and Play - Using the framework to decypher a stream of token sizes extracted from a evesdropping the network
+1) Plug and Play - Using the framework to decypher a stream of token sizes extracted from a evesdropping the network.
 2) Generation & Evaluation - Using the framework on a spesified dataset, and evaluating it's preformance
 3) Train - Training the framework from scrach (pre-trained) or from our proposed models (fine-tune) on a spesified dataset.
-And We also offer python scripts and Jupyter notebook for each usecase for you convinience.
+
+For all of the usecases above we also offer python scripts and Jupyter notebooks for you convinience.
+
+```
+
+```
+
+### Plug and Play ###
+This module is the simplest module. Use it to try out the framework. It can recive two kinds of input:
+1. A sequence of **token** lengths
+2. A sequence of **packet** lengths
+The difference is that packet lengths are taken straight up from the pcap file. They are incremental, meaning the response is beeing build up over the stream of packets. For example, the packets may contain:
+```
+I, I can, I can't, I can't diagnose, I can't diagnose medical .....
+```
+This module can also be found in the PlugAndPlay.ipynb notebook.
+
+### Generation ###
+In order to generate the responses on a full scale you can use generate.py. There a user can generate full paragraphs using the models we have fine-tuned (which are hosted on Huggingface).
+We have also included a jupyter notebook with all of the relevant metrics in order to fully evaluate the generated paragraphs/sentneces. The notebook includes both text analysis metrics such as Rouge and Edit Distance and Topic analysis using Sentence Transformer's embeddings cosine simularity.
 
 
+### Train ###
+
+
+## Examples
+Here are examples of reconstructions of Responses which were extracted from real PCAP files. We eavesdropped real conversations  with ChatGPT and Microsoft Copilot.
+![Screenshot 2024-05-26 at 15 11 07](https://github.com/royweiss1/GPT_Keylogger/assets/92648019/31e34335-7c52-435b-83e8-30669785c06c)
+![Screenshot 2024-05-26 at 15 11 16](https://github.com/royweiss1/GPT_Keylogger/assets/92648019/cc2002aa-9f05-4957-bee5-81e40fb68c49)
 
 
 
@@ -48,17 +74,6 @@ And We also offer python scripts and Jupyter notebook for each usecase for you c
 * Our models were trained on GPT-4 responses - Note that using it on a different LLM might cause worse results (due to different tokenizer and diffrent pattern of responses)
 * Our model was trained using the UltraChat dataset. Using it on different datasets that includes different topics might lead to lower results.
 
-
-
-
-### Plug and Play ###
-We offer a plug and play Jupyter Notebook - Demonstration.ipynb. There you can simply enter the packet sizes from the pcap file. Then the model will generate to you the responses sorted by the model's confidence score.
-
-### Generation ###
-In order to generate the responses on a full scale you can use generate.py. There a user can generate full paragraphs using the models we have fine-tuned (which are hosted on Huggingface).
-
-### Evaluate ###
-We have also included a jupyter notebook with all of the relevant metrics in order to fully evaluate the generated paragraphs/sentneces. The notebook includes both text analysis metrics such as Rouge and Edit Distance and Topic analysis using Sentence Transformer's embeddings cosine simularity. 
 
 
 
