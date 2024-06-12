@@ -63,9 +63,15 @@ We have also included a jupyter notebook with all of the relevant metrics in ord
 
 
 ## Examples
-Here are examples of reconstructions of Responses which were extracted from real PCAP files. We eavesdropped real conversations  with ChatGPT and Microsoft Copilot.
+Here are examples of reconstructions of Responses which were extracted from real PCAP files. We eavesdropped real conversations with ChatGPT and Microsoft Copilot.
+
 ![Screenshot 2024-05-26 at 15 11 07](https://github.com/royweiss1/GPT_Keylogger/assets/92648019/31e34335-7c52-435b-83e8-30669785c06c)
 ![Screenshot 2024-05-26 at 15 11 16](https://github.com/royweiss1/GPT_Keylogger/assets/92648019/cc2002aa-9f05-4957-bee5-81e40fb68c49)
+
+We Also provide a Youtube demonstration video of the attack: [here](https://www.youtube.com/watch?v=UfenH7xKO1s&t)
+
+
+https://github.com/royweiss1/GPT_Keylogger/assets/92648019/0abee8e1-a04f-42a3-b4ed-d2e1dda78caa
 
 
 
