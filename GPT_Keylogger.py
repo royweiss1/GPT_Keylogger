@@ -4,8 +4,8 @@ print("Loading...")
 import argparse
 import sys
 import os
-import generate
-import plug_play
+import scripts.generate as generate
+import scripts.plug_play as plug_play
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Plug & Play. Use the latter for trying the framework out.")

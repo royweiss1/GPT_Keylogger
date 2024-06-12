@@ -1,6 +1,6 @@
 import pandas as pd
 import Levenshtein
-import evaluate_script
+import scripts.evaluate_script as evaluate_script
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 from accelerate import Accelerator

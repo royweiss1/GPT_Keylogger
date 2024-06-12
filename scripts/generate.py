@@ -9,7 +9,7 @@ import csv
 import json
 import sys
 
-import evaluate_script
+import scripts.evaluate_script as evaluate_script
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"

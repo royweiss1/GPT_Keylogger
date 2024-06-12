@@ -1,0 +1,31 @@
+{
+    "test_dataset_path": "data/test.json",
+    "generated_output_path": "data/generated.csv",
+    "BATCH_SIZE": 8,
+
+    "evaluate": true,
+    "generated_metrics_path": "data/results.pickle",
+
+    "first_sentences_generation_config": {
+        "first_sentences_model_name": "/royweiss1/T5_FirstSentences",
+        "MAX_LENGTH": 80,
+        "top_k": 50,
+        "num_beam_groups": 16,
+        "num_beams": 32,
+
+        "no_repeat_ngram_size": 2,
+        "diversity_penalty": 0.8
+    },
+    "middle_sentences_generation_config": {
+        "middle_sentences_model_name": "/royweiss1/T5_MiddleSentences",
+        "MAX_LENGTH": 160,
+        "top_k": 50,
+        "num_beam_groups": 5,
+        "num_beams": 30,
+        "length_penalty": 2.0,
+        "no_repeat_ngram_size": 2,
+        "diversity_penalty": 0.2
+    },
+    "_comment": "VERY IMPORTANT: Please DO NOT change the order of the parameters",
+    "__comment": "num_beams needs to be a multiple of num_beam_groups. Also in the middle sentences diversity_penalty should be lower because we want to keep the context"
+}
