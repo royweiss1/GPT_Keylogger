@@ -42,7 +42,18 @@ In this repository we offer a CLI tool capabale of:
 For all of the usecases above we also offer python scripts and Jupyter notebooks for you convinience.
 
 ```
+Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Plug & Play. Use the latter for trying the
+framework out.
 
+options:
+  -h, --help            show this help message and exit
+  --train-first-sentences <configuration file>, -tf <configuration file>
+                        Train the framework's first sentences model, with a configuration file.
+  --train-middle-sentences <configuration file>, -tm <configuration file>
+                        Train the framework's first sentences model, with a configuration file.
+  --generate <configuration file>, -g <configuration file>
+                        Generate mode is used to evaluate the framework, with a configuration file.
+  --play, -p            Plug and Play mode, use the framework for specific samples. No configuration file is needed.
 ```
 
 ### Plug and Play ###
@@ -53,12 +64,33 @@ The difference is that packet lengths are taken straight up from the pcap file. 
 ```
 I, I can, I can't, I can't diagnose, I can't diagnose medical .....
 ```
+Use it with:
+```
+python GPT_Keylogger.py --play
+```
+
 This module can also be found in the PlugAndPlay.ipynb notebook.
 
 ### Generation ###
-In order to generate the responses on a full scale you can use generate.py. There a user can generate full paragraphs using the models we have fine-tuned (which are hosted on Huggingface).
-We have also included a jupyter notebook with all of the relevant metrics in order to fully evaluate the generated paragraphs/sentneces. The notebook includes both text analysis metrics such as Rouge and Edit Distance and Topic analysis using Sentence Transformer's embeddings cosine simularity.
+This module offers full evaluation of our framework against an arbitrary AI Assistent responses dataset. We offer the option to both generate decyphered responses and also evaluate their similarity to the original responses.
 
+To use it you need to spesify a generation-configuration file (an example could be found under `config/generation_config.json`). In the config file there are spesifications on:
+- What path should the results be saved to.
+- What model should be used.
+- What hyperparameters should be used to generated the responses using the models.
+
+We offer a default configuration file for you ease of use.
+
+The only requerment is that the dataset that is used will follow the following format:
+```
+TODO:
+```
+We offer the test set that was used in our paper at: `data\test.json`. It also avaliable at huggingface with the rest of the dataset: [here](https://huggingface.co/datasets/royweiss1/GPT_Keylogger_Dataset)
+
+Make sure to run:
+```
+python GPT_Keylogger.py --generate config/generation_config.json
+```
 
 ### Train ###
 
