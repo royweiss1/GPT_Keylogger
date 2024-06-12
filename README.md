@@ -42,7 +42,18 @@ In this repository we offer a CLI tool capabale of:
 For all of the usecases above we also offer python scripts and Jupyter notebooks for you convinience.
 
 ```
+Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Plug & Play. Use the latter for trying the
+framework out.
 
+options:
+  -h, --help            show this help message and exit
+  --train-first-sentences <configuration file>, -tf <configuration file>
+                        Train the framework's first sentences model, with a configuration file.
+  --train-middle-sentences <configuration file>, -tm <configuration file>
+                        Train the framework's first sentences model, with a configuration file.
+  --generate <configuration file>, -g <configuration file>
+                        Generate mode is used to evaluate the framework, with a configuration file.
+  --play, -p            Plug and Play mode, use the framework for specific samples. No configuration file is needed.
 ```
 
 ### Plug and Play ###
@@ -67,7 +78,9 @@ To use it you need to spesify a generation-configuration file (an example could 
 - What path should the results be saved to.
 - What model should be used.
 - What hyperparameters should be used to generated the responses using the models.
+
 We offer a default configuration file for you ease of use.
+
 The only requerment is that the dataset that is used will follow the following format:
 ```
 TODO:
@@ -77,7 +90,6 @@ We offer the test set that was used in our paper at: `data\test.json`. It also a
 Make sure to run:
 ```
 python GPT_Keylogger.py --generate config/generation_config.json
-
 ```
 
 ### Train ###
