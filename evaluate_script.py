@@ -10,18 +10,17 @@ from torch import nn
 import pickle
 
 
-accelerator = Accelerator(cpu=False)
-torch.cuda.empty_cache()
-print("-------Device:", accelerator.device)
-
-
 def format_floats(float_list):
     return [float(f"{num:.3f}") for num in float_list]
 
 
-model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
-model_sentence_transformers = model_sentence_transformers.to(accelerator.device) 
 def compute_metrics(reference_sentence, sentence_to_compare):
+    accelerator = Accelerator(cpu=False)
+    torch.cuda.empty_cache()
+    print("-------Device:", accelerator.device, "-------")
+    model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
+    model_sentence_transformers = model_sentence_transformers.to(accelerator.device) 
+
     embed_pred = model_sentence_transformers.encode([sentence_to_compare], convert_to_tensor=True)
     embed_reference = model_sentence_transformers.encode([reference_sentence], convert_to_tensor=True)
 

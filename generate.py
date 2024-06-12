@@ -20,11 +20,12 @@ def validate_and_read_config(config_path):
         "generated_output_path": str,
         "BATCH_SIZE": int,
 
-        "generated_metrics_path": str,
         "evaluate": bool,
+        "generated_metrics_path": str,
 
         "first_sentences_generation_config": {
             "first_sentences_model_name": str,
+            "MAX_LENGTH": int,
             "top_k": int,
             "num_beam_groups": int,
             "num_beams": int,
@@ -34,6 +35,7 @@ def validate_and_read_config(config_path):
         },
         "middle_sentences_generation_config": {
             "middle_sentences_model_name": str,
+            "MAX_LENGTH": int,
             "top_k": int,
             "num_beam_groups": int,
             "num_beams": int,
@@ -69,6 +71,11 @@ def validate_and_read_config(config_path):
 
 
 def data_process(test_dataset_path: str) -> pd.DataFrame:
+    if not test_dataset_path.endswith('.json') and not test_dataset_path.endswith('.jsonl'):
+        if '.' in test_dataset_path:
+            raise ValueError("The test dataset must be a JSONL file.")
+        test_dataset_path += '.jsonl'
+
     # Load the JSONL file
     with open(test_dataset_path, 'r') as file:
         data = [json.loads(line) for line in file]
