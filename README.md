@@ -7,7 +7,8 @@ This is the official repository for the code used in the paper:
 ["What Was Your Prompt? A Remote Keylogging Attack on AI Assistants"](https://arxiv.org/abs/2403.09751), USENIX Security 24'
 
 *Weiss R, Ayzenshteyn D, Amit G, Mirsky Y "What Was Your Prompt? A Remote Keylogging Attack on AI Assistants", USNIX Security 24*
-If you use any derivative of this code in your work, please cite our publicaiton. You may use the TODO FILL AT THE END BIBTEX
+
+If you use any derivative of this code in your work, please cite our publicaiton. You can find a BibTex citation below.
 
 For more details you view our paper:
 [here](https://arxiv.org/abs/2403.09751)
@@ -81,12 +82,22 @@ https://github.com/royweiss1/GPT_Keylogger/assets/92648019/0abee8e1-a04f-42a3-b4
 * Our model was trained using the UltraChat dataset. Using it on different datasets that includes different topics might lead to lower results.
 
 
-
-
 <!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+### Citation
+
+```
+@inproceedings{weissLLMSideChannel,
+  title={What Was Your Prompt? A Remote Keylogging Attack on AI Assistants},
+  author={Weiss, Roy and Ayzenshteyn, Daniel and Amit Guy and Mirsky, Yisroel}
+  booktitle={USENIX Security},
+  year={2024}
+}
+```
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
