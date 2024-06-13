@@ -83,8 +83,21 @@ We offer a default configuration file for you ease of use.
 
 The only requerment is that the dataset that is used will follow the following format:
 ```
-TODO:
+{
+    "paragraphs": [
+        [
+          "Sentence1",
+          "Sentence2",
+          ...
+        ],
+        [
+          ...
+        ]
+    ]
+}
 ```
+The partition to sentences may be done using a hueristic we propose (on `archive/hueristic.ipynb`).
+
 We offer the test set that was used in our paper at: `data\test.json`. It also avaliable at huggingface with the rest of the dataset: [here](https://huggingface.co/datasets/royweiss1/GPT_Keylogger_Dataset)
 
 Make sure to run:
@@ -93,7 +106,20 @@ python GPT_Keylogger.py --generate config/generation_config.json
 ```
 
 ### Train ###
+This module is composed of 2 modules. As described in our paper our framework is compoed of 2 T5 models which have been fine tuned for different missions. We took the desired paragraph and divided it into sentences. The first sentences was passed into the model which was fined tuned on the first sentences. The i_th (i>1) was passed into the second model which was trained on 'middle' sentences. The i_th sentences was given as input with the (i-1)_th setences as context. This way we have build an entire paragraph.
 
+In this module we offer the user the to train a model for this task. The user must supply a configuration file, which can be found at `config/training_first_config.json` or at `config/training_middle_config.json`.
+
+For training the first sentences:
+
+```
+python GPT_Keylogger.py --train-first-sentences config/generation_config.json
+python GPT_Keylogger.py -tf config/generation_config.json
+```
+```
+python GPT_Keylogger.py --train-middle-sentences config/generation_config.json
+python GPT_Keylogger.py -tm config/generation_config.json
+```
 
 ## Examples
 Here are examples of reconstructions of Responses which were extracted from real PCAP files. We eavesdropped real conversations with ChatGPT and Microsoft Copilot.
