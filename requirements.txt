@@ -1,0 +1,11 @@
+torch
+transformers
+tiktoken
+pandas
+numpy
+tqdm
+evaluate
+accelerate
+datasets
+regex
+Levenshtein

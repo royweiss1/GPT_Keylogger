@@ -5,7 +5,6 @@ from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 from accelerate import Accelerator
 import torch
-import numpy as np
 from torch import nn
 import pickle
 

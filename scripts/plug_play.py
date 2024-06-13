@@ -1,4 +1,3 @@
-import numpy as np
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from accelerate import Accelerator
 import torch

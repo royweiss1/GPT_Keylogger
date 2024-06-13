@@ -5,7 +5,6 @@ from accelerate import Accelerator
 from tqdm import tqdm
 import os
 import tiktoken  # GPT-4 tokenizer
-import csv
 import json
 import sys
 
