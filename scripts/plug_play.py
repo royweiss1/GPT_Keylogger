@@ -1,6 +1,8 @@
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from accelerate import Accelerator
 import torch
+import tiktoken
+import regex as re
 
 
 def generate_first(encodings):
@@ -51,9 +53,76 @@ def parse_packet_lengths(lengths):
     for i in range(1, len(lengths)):
         token_lengths.append((lengths[i] - lengths[i-1])//2)
     return token_lengths
+
+
+
+def encode_text(text):
+    enc = tiktoken.encoding_for_model("gpt-4")
+    tokenized_text = enc.encode(text)
+    return tokenized_text
+
+
+def decode_text(text):
+    enc = tiktoken.encoding_for_model("gpt-4")
+    decoded_tokens = [enc.decode([token]) for token in text]
+    return decoded_tokens
+
+
+def apply_token(text):
+    enc = tiktoken.encoding_for_model("gpt-4")
+    tokenized_text = [enc.decode([token]) for token in enc.encode(text)]
+    return tokenized_text
+
+
+
+def concatenate_sentences(answer):
+    new_answer = []
+    index = 0
+    while index < len(answer) - 1:
+        sentence = answer[index]
+        if re.search(r':\n\n\d\.', sentence):
+            if len(sentence) <= 90:
+                new_answer.append(sentence + answer[index + 1])
+                index += 1
+            else:
+                new_answer.append(sentence)
+        else:
+            new_answer.append(sentence)
+        index += 1
+    return new_answer
+
+
+def heuristic_string(answer: str):
+    sentences = []
+    decoded = decode_text(encode_text(answer))
+    lengths = [len(dec) for dec in decoded]
+    index = 0
+    tokens_in_streak = 0
+    while index < len(lengths):
+        if tokens_in_streak >= 10 and lengths[index] == 1:
+            if lengths[index-1] == 3:
+                sentences.append("".join(decoded[:tokens_in_streak]))
+                decoded = decoded[tokens_in_streak:]
+            elif lengths[index-1] == 1:
+                sentences.append("".join(decoded[:tokens_in_streak-1]))
+                decoded = decoded[tokens_in_streak-1:]
+                index -= 1
+            else:
+                sentences.append("".join(decoded[:tokens_in_streak+1]))
+                decoded = decoded[tokens_in_streak+1:]
+                index += 1
+            tokens_in_streak = 0
+        else:
+            index += 1
+            tokens_in_streak += 1
+    else:
+        if tokens_in_streak > 0:
+            sentences.append("".join(decoded))
+    answer = concatenate_sentences(answer)
+    return sentences
         
 
-def heuristic(lengths):
+def heuristic_list(lengths: list):
     sentences = []
     index = 0
     tokens_in_streak = 0
@@ -85,25 +154,30 @@ def make_input(lst_lengths):
     return f"Translate the Special Tokens to English. \nSpecial Tokens:{lst_str}"
 
 
-def main():
-    packet_lens = False
-    input_str = input("Please enter the correct number based of the kind of input that you wish to enter: Token Sizes (1) or Packet Lengths (2): ")
-    while input_str != "1" and input_str != "2":
-        input_str = input("Please enter the correct number based of the kind of input that you wish to enter: Token Sizes (1) or Packet Lengths (2): ")
-    if input_str == "2":
-        packet_lens = True
 
-    input_str = input("Enter the lengths of the packets divided by comma (,) or -1 if you wish to stop: ")
-    while input_str != "-1":
-        token_lens = [int(x) for x in input_str.split(",")]
-        if packet_lens:
-            token_lens = parse_packet_lengths(token_lens)
+
+def main():
+    type_of_input = input("What do you wish to enter? Test Paragraph (1) or Token Sizes (2) or Packet Lengths (3): ")
+    while type_of_input != "1" and type_of_input != "2" and type_of_input != "3":
+        type_of_input = input("What do you wish to enter? Test Paragraph (1) or Token Sizes (2) or Packet Lengths (3): ")
+    
+    input_str = ""
+    while input_str.lower() != "yes":
+        if type_of_input == "1":
+            input_str = input("Enter the paragraph: ")
+            token_lens = heuristic_string(input_str)[0] # take the first sentence based on the heuristic
+        else:
+            input_str = input("Enter the lengths divided by comma (,): ")
+            token_lens = [int(x) for x in input_str.split(",")]
+            if type_of_input == "3":
+                token_lens = parse_packet_lengths(token_lens)
+                token_lens = heuristic_list(token_lens)[0] # take the first sentence based on the heuristic
+        
         print("Token lengths:", token_lens)
         print("Generating first sentences...")
-        token_lens = heuristic(token_lens)[0] # take the first sentence based on the heuristic
         outputs = generate_first([make_input(token_lens)]) # output is sorted by the model's confidence!!!
         print("First sentences generated, ranked by the model's confidence:")
         for rank, output in enumerate(outputs):
             print(f"Rank: {rank+1}. Output: {output}")
         print("*"*50)
-        input_str = input("Enter the lengths of the packets divided by comma (,) or -1 if you wish to stop: ")
+        input_str = input("Do you wish to stop? yes/no: ")
