@@ -164,7 +164,7 @@ def main():
     input_str = ""
     while input_str.lower() != "yes":
         if type_of_input == "1":
-            input_str = input("Enter the paragraph: ")
+            input_str = input("Enter the paragraph or first Sentence: ")
             token_lens = heuristic_string(input_str)[0] # take the first sentence based on the heuristic
         else:
             input_str = input("Enter the lengths divided by comma (,): ")
