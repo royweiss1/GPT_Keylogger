@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
 
 # GPT Keylogger
-In this repository you will find a python implementation of GPT Keylogger, a tool used for decyphering encrypted LLM's responses over the web.
+In this repository you will find a python implementation of a tool for deciphering encypeted responses sent from AI assistants (such as ChatGPT, Copilot, ...).
 
 This is the official repository for the code used in the paper:
 ["What Was Your Prompt? A Remote Keylogging Attack on AI Assistants"](https://arxiv.org/abs/2403.09751), USENIX Security 24'
@@ -10,7 +10,7 @@ This is the official repository for the code used in the paper:
 
 If you use any derivative of this code in your work, please cite our publicaiton. You can find a BibTex citation below.
 
-For more details you view our paper:
+For more details you can view a preprint of our paper:
 [here](https://arxiv.org/abs/2403.09751)
 
 # Description
@@ -21,6 +21,12 @@ Many modern LLM (AI assitant) services are vulnerable to a side channel attack t
 We unveil a novel side-channel that can be used to read encrypted responses from AI Assistants over the web: the token-length side-channel. 
 The attack relays on the fact that LLM Services sends their responses to the users in a streaming like manner. If each token (akin to word) is sent carelessly in a new packet, a MitM adversary that listens to the generated network can infer the size of the tokens of the AI Assistent response.
 With this information in hand we show how a model can be trained to infer the topic of the asked response.
+
+## Features
+- 
+- 
+
+Note: the tool in this repository does not operate on network captures (e.g., pcaps). You must extract qand provide the token sequences yourself
 
 ## Contents
 
