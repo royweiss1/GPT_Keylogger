@@ -22,7 +22,8 @@ def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to
     cos = nn.CosineSimilarity(dim=1, eps=1e-6)
     sen_trans_score = cos(embed_pred, embed_reference)
     cosine_score = tuple(sen_trans_score.detach().cpu().numpy())
-
+    if not evaluate_all_metrics:
+        return format_floats([cosine_score[0]])
     rouge = evaluate.load('rouge')
     rouge_results = rouge.compute(predictions=[sentence_to_compare], references=[reference_sentence], use_aggregator=False)
     rouge_L = rouge_results["rougeL"][0]
