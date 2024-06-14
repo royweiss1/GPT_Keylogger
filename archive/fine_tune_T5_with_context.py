@@ -1,11 +1,10 @@
 import torch
-from datasets import load_dataset, load_metric
+from datasets import load_dataset
 import pandas as pd
-from torch import nn
+import evaluate
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
 import numpy as np
-import nltk
-nltk.download('punkt', download_dir='/home/user/Projects/GPT_Keylogger/T5_MiddleSentences')
+import re
 from sentence_transformers import SentenceTransformer
 from accelerate import Accelerator
 import Levenshtein
@@ -15,7 +14,6 @@ import json
 torch.cuda.empty_cache()
 model_checkpoint = "t5-base"
 MAX_LENGTH = 180
-
 
 def apply_token(text):
     enc = tiktoken.encoding_for_model("gpt-4")
@@ -30,9 +28,6 @@ def encoding_lengths(text):
 
 def make_input(context, special_tokens):
     return f'Translate the Special Tokens to English, given the context. \nContext: {context} \nSpecial Tokens:{special_tokens}'
-
-def make_context():
-    pass
 
 def prepare_ds():
     for section in ("validation", "train"):
@@ -122,14 +117,20 @@ def compute_metrics(eval_pred):
 
     decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
 
+    def split_into_sentences(text):
+        # Define the sentence enders
+        sentence_enders = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s')
+        sentences = sentence_enders.split(text.strip())
+        return sentences
+
     # Rouge expects a newline after each sentence
-    decoded_preds_rouge = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
-    decoded_labels_rouge = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
+    decoded_preds_rouge = ["\n".join(split_into_sentences(pred)) for pred in decoded_preds]
+    decoded_labels_rouge = ["\n".join(split_into_sentences(label)) for label in decoded_labels]
 
     # Rouge:
-    metric_rouge = load_metric("rouge")
+    metric_rouge = evaluate.load_metric("rouge")
     result = metric_rouge.compute(predictions=decoded_preds_rouge, references=decoded_labels_rouge, use_stemmer=True)
-
+    
     # Extract ROUGE f1 scores
     result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
     # Add mean generated length to metrics
@@ -140,11 +141,11 @@ def compute_metrics(eval_pred):
     model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
     embed_preds = model_sentence_transformers.encode(decoded_preds, convert_to_tensor=True)
     embed_labels = model_sentence_transformers.encode(decoded_labels, convert_to_tensor=True)
-    cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+    cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
     outputs = cos(embed_preds, embed_labels)
     result["sentence-transformer"] = torch.mean(outputs, dim=0).item()
 
-    result["edit_distance"] = np.mean([Levenshtein.distance(pred, label) for pred, label in zip(decoded_preds, decoded_labels)])
+    result["edit_distance"] = np.mean([(max(len(pred), len(label)) - Levenshtein.distance(pred, label)) / max(len(pred), len(label)) for pred, label in zip(decoded_preds, decoded_labels)])
 
     # return all in one dict
     return {k: round(v, 4) for k, v in result.items()}

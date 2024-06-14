@@ -6,6 +6,7 @@ import sys
 import os
 import scripts.generate as generate
 import scripts.plug_play as plug_play
+import scripts.train as train
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Plug & Play. Use the latter for trying the framework out.")
@@ -34,25 +35,18 @@ def main():
     
     if args.train_first_sentences:
         validate_file_path(args.train)
-        print(f"Training with configuration file: {args.train}")
-        # Add your training code here
+        train.main(args.train, first_sentences=True)
         
     elif args.train_middle_sentences:
         validate_file_path(args.train)
-        print(f"Training with configuration file: {args.train}")
-        # Add your training code here
+        train.main(args.train, first_sentences=False)
 
     elif args.generate:
         validate_file_path(args.generate)
         generate.main(args.generate)
         
-
     elif args.play:
         plug_play.main()
-
-
-
-
 
 
 if __name__ == '__main__':

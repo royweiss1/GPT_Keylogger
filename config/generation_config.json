@@ -26,6 +26,5 @@
         "no_repeat_ngram_size": 2,
         "diversity_penalty": 0.2
     },
-    "_comment": "VERY IMPORTANT: Please DO NOT change the order of the parameters",
     "__comment": "num_beams needs to be a multiple of num_beam_groups. Also in the middle sentences diversity_penalty should be lower because we want to keep the context"
 }
