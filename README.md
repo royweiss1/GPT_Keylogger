@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
 
 # GPT Keylogger
-In this repository you will find a python implementation of GPT Keylogger, a tool used for decyphering encrypted LLM's responses over the web.
+In this repository you will find a python implementation of a tool for deciphering encypeted responses sent from AI assistants (such as ChatGPT, Copilot, ...).
 
 This is the official repository for the code used in the paper:
 ["What Was Your Prompt? A Remote Keylogging Attack on AI Assistants"](https://arxiv.org/abs/2403.09751), USENIX Security 24'
@@ -10,20 +10,29 @@ This is the official repository for the code used in the paper:
 
 If you use any derivative of this code in your work, please cite our publicaiton. You can find a BibTex citation below.
 
-For more details you view our paper:
+For more details you can view a preprint of our paper:
 [here](https://arxiv.org/abs/2403.09751)
 
 # Description
-Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**...
+Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**. Imagine awkwardly asking your AI about a strange rash, or to edit an email, only to have that conversation exposed to someone on the net. In this repository we demonstrate how our unvailed side channel can be used to read encrypted messages sent from AI Assistants. The figure below shows the general idea of the Side Channel:
 
 ![image](https://github.com/royweiss1/GPT_Keylogger/assets/92648019/9c9f1bce-1bf2-4f02-902d-47249bf48a9c)
 
-We unveil a novel side-channel that can be used to read encrypted responses from AI Assistants over the web: the token-length side-channel. 
-The attack relays on the fact that LLM Services sends their responses to the users in a streaming like manner. If each token (akin to word) is sent carelessly in a new packet, a MitM adversary that listens to the generated network can infer the size of the tokens of the AI Assistent response.
-With this information in hand we show how a model can be trained to infer the topic of the asked response.
+We unveil a novel token-length side-channel. The attack relays on the fact that LLM Services sends their responses to the users in a streaming like manner. If each token (akin to word) is sent carelessly in a new packet, a MitM adversary that listens to the generated network can infer the size of the tokens of the AI Assistent response. With this information in hand we show how a model can be trained to infer the topic of the asked response.
+
+## Features
+* Our models were trained on GPT-4 responses - Note that using it on a different LLM might cause worse results (due to different tokenizer and diffrent pattern of responses)
+* Our model was trained using the UltraChat dataset. Using it on different datasets that includes different topics might lead to lower results.
+
+💡 **Note: The tool in this repository does not operate on network captures (e.g., pcaps). You must extract and provide the token sequences yourself**
 
 ## Contents
-
+1) Setup - Simple installation of required libraries
+2) General Usage:
+   * Plug & Play Module
+   * Generate & Evaluate Module
+   * Train Module
+3) Examples - From pcap files + A demo video
 
 ## Setup
 ```
@@ -73,6 +82,8 @@ This module can also be found in the PlugAndPlay.ipynb notebook.
 
 ### Generation ###
 This module offers full evaluation of our framework against an arbitrary AI Assistent responses dataset. We offer the option to both generate decyphered responses and also evaluate their similarity to the original responses.
+
+Note: Use this module if you wish to repreduce our results from the paper, using the default configuration file.
 
 To use it you need to spesify a generation-configuration file (an example could be found under `config/generation_config.json`). In the config file there are spesifications on:
 - What path should the results be saved to.
@@ -132,12 +143,6 @@ We Also provide a Youtube demonstration video of the attack: [here](https://www.
 
 https://github.com/royweiss1/GPT_Keylogger/assets/92648019/0abee8e1-a04f-42a3-b4ed-d2e1dda78caa
 
-
-
-
-### Limitations
-* Our models were trained on GPT-4 responses - Note that using it on a different LLM might cause worse results (due to different tokenizer and diffrent pattern of responses)
-* Our model was trained using the UltraChat dataset. Using it on different datasets that includes different topics might lead to lower results.
 
 
 <!-- LICENSE -->
