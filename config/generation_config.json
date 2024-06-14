@@ -4,6 +4,7 @@
     "BATCH_SIZE": 8,
 
     "evaluate": true,
+    "evaluate_all_metrics": false,
     "generated_metrics_path": "data/generated_results.pickle",
 
     "first_sentences_generation_config": {

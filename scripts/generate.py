@@ -291,7 +291,7 @@ def main(config_path: str):
         generate_first_custom(test_set, config["BATCH_SIZE"], config["generated_path"], config["first_sentences_generation_config"])
         generate_first_custom_with_context(config["generated_path"], config["middle_sentences_generation_config"])
         if config["evaluate"]:
-            evaluate_script.main(config["generated_path"], config["generated_metrics_path"])
+            evaluate_script.main(config["generated_path"], config["generated_metrics_path"], config["evaluate_all_metrics"])
 
     except (ValueError, FileNotFoundError) as e:
         print(f"Configuration error: {e}")

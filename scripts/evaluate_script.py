@@ -13,7 +13,7 @@ def format_floats(float_list):
     return [float(f"{num:.3f}") for num in float_list]
 
 
-def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to_compare):
+def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to_compare, evaluate_all_metrics):
 
     embed_pred = model_sentence_transformers.encode([sentence_to_compare], convert_to_tensor=True)
     embed_reference = model_sentence_transformers.encode([reference_sentence], convert_to_tensor=True)
@@ -38,7 +38,7 @@ def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to
     return format_floats([cosine_score[0], rouge_1, rouge_L, ed, jac])
 
 
-def calculate_scores(csv_file_path, output_pickle_path, start_idx=0, end_idx=None, checkpoint_interval=500):
+def calculate_scores(csv_file_path, output_pickle_path, evaluate_all_metrics, start_idx=0, end_idx=None, checkpoint_interval=500):
     # Load the combined CSV file
     accelerator = Accelerator(cpu=False)
     torch.cuda.empty_cache()
@@ -77,7 +77,7 @@ def calculate_scores(csv_file_path, output_pickle_path, start_idx=0, end_idx=Non
                     ref_combined = "".join(reference_para)
                     gen_combined = "".join(generated_para)
 
-                    scores = compute_metrics(model_sentence_transformers, ref_combined, gen_combined)
+                    scores = compute_metrics(model_sentence_transformers, ref_combined, gen_combined, evaluate_all_metrics)
                     row_other_scores.append(scores)
         
         all_other_scores.append(row_other_scores)
@@ -108,8 +108,8 @@ def read_and_print_pickle(pickle_file_path):
 
 # read_and_print_pickle("scores.pkl")
 
-def main(generated_output_path: str, generated_metrics_path: str):
-    calculate_scores(generated_output_path, generated_metrics_path)
+def main(generated_output_path: str, generated_metrics_path: str, evaluate_all_metrics: bool):
+    calculate_scores(generated_output_path, generated_metrics_path, evaluate_all_metrics)
     read_and_print_pickle(generated_metrics_path)
 
 
