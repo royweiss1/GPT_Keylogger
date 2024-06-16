@@ -10,8 +10,6 @@ This is the official repository for the code used in the paper:
 
 If you use any derivative of this code in your work, please cite our publicaiton. You can find a BibTex citation below.
 
-For more details you can view a preprint of our paper:
-[here](https://arxiv.org/abs/2403.09751)
 
 # Description
 Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**. Imagine awkwardly asking your AI about a strange rash, or to edit an email, only to have that conversation exposed to someone on the net. In this repository we demonstrate how our unvailed side channel can be used to read encrypted messages sent from AI Assistants. The figure below shows the general idea of the Side Channel:
