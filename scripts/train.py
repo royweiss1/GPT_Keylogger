@@ -1,3 +1,13 @@
+import os
+import sys
+import warnings
+
+warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", message="A NumPy version >=1.17.3 and <1.25.0 is required for this version of SciPy")
+
+from transformers import logging as hf_logging
+hf_logging.set_verbosity_error()
+
 import numpy as np
 import re
 from sentence_transformers import SentenceTransformer
@@ -9,13 +19,18 @@ import pandas as pd
 from accelerate import Accelerator
 from tqdm import tqdm
 from datasets import load_dataset
-import os
 import tiktoken  # GPT-4 tokenizer
 import json
-import sys
+
+
+def fix_path(path: str):
+    if path.endswith("/"):
+        return path[:-1]
+    return path
 
 
 def validate_and_read_config(config_path):
+    config_path = fix_path(config_path)
     required_fields = {
         "model_path": str,
         "pretrained_model": bool,
@@ -24,9 +39,9 @@ def validate_and_read_config(config_path):
         "preprocessed_data_path": str,
         "processed_data_path": str,
         "MAX_LENGTH": int,
-        "BATCH_SIZE": int,
 
         "train_conf": {
+            "BATCH_SIZE": int,
             "epochs": int,
             "weight_decay": float,
             "learning_rate": float,
@@ -73,18 +88,23 @@ def encoding_lengths(text):
     return "".join([" _"+c for c in row])
     
 def _prepare_ds_first_sentences(preprocessed_data_path: str, processed_data_path: str, MAX_LENGTH):
+    preprocessed_data_path = fix_path(preprocessed_data_path)
+    processed_data_path = fix_path(processed_data_path)
+
     def make_input(special_tokens):
         return f'Translate the Special Tokens to English. \nSpecial Tokens:{special_tokens}'
 
     def extract_first(section):
-        with open(f'{preprocessed_data_path}/{section}.json', 'r') as file:
-            data = [json.loads(line) for line in file]
-
+        file_path = os.path.join(preprocessed_data_path, f'{section}.json')
+        
+        with open(file_path, 'r') as file:
+            data = json.load(file)  # Load the entire file as a single JSON object
+        
         first_items = []
-        for entry in data:
-            paragraphs = entry['paragraphs']
-            for paragraph in paragraphs:
+        for entry in data['paragraphs']:  # Assuming the top-level key is 'paragraphs'
+            for paragraph in entry:
                 first_items.append(paragraph[0])
+        
         return first_items
     
     df_validation = pd.DataFrame(columns=["Sentence"])
@@ -104,12 +124,17 @@ def _prepare_ds_first_sentences(preprocessed_data_path: str, processed_data_path
 
 
 def _prepare_ds_middle_sentences(preprocessed_data_path: str, processed_data_path: str, MAX_LENGTH: int):
+    preprocessed_data_path = fix_path(preprocessed_data_path)
+    processed_data_path = fix_path(processed_data_path)
     def make_input(context, special_tokens):
         return f'Translate the Special Tokens to English, given the context. \nContext: {context} \nSpecial Tokens:{special_tokens}'
 
     for section in ("validation", "train"):
-        with open(f'{preprocessed_data_path}/{section}.json', 'r') as file:
-            data = [json.loads(line) for line in file]
+        file_path = os.path.join(preprocessed_data_path, f'{section}.json')
+        
+        with open(file_path, 'r') as file:
+            data = json.load(file)  # Load the entire file as a single JSON object
+        
         pairs = []
         for entry in data:
             paragraphs = entry['paragraphs']
@@ -140,17 +165,20 @@ def _preprocess_function(examples, tokenizer):
     return model_inputs
 
 def preprocess_dataset(first_sentences: bool, preprocessed_data_path: str, processed_data_path: str, MAX_LENGTH: int, tokenizer: AutoTokenizer):
+    preprocessed_data_path = fix_path(preprocessed_data_path)
+    processed_data_path = fix_path(processed_data_path)
     # if already procceesed, remove the following line:
-    if first_sentences:
-        _prepare_ds_first_sentences(preprocessed_data_path, processed_data_path, MAX_LENGTH)
-    else:
-        _prepare_ds_middle_sentences(preprocessed_data_path, processed_data_path, MAX_LENGTH)
-    dataset = load_dataset("json", data_files={"train": f"{processed_data_path}/train.jsonl", "validation": f"{processed_data_path}/validation.jsonl"})
-    tokenized_datasets = dataset.map(_preprocess_function, batched=True, fn_kwargs={"tokenizer": tokenizer})
-    for split, split_dataset in tokenized_datasets.items():
-        split_dataset.to_json(f"{processed_data_path}/{split}.jsonl")
+    # print("Processing Dataset...")
+    # if first_sentences:
+    #     _prepare_ds_first_sentences(preprocessed_data_path, processed_data_path, MAX_LENGTH)
+    # else:
+    #     _prepare_ds_middle_sentences(preprocessed_data_path, processed_data_path, MAX_LENGTH)
+    # dataset = load_dataset("json", data_files={"train": f"{processed_data_path}/train.jsonl", "validation": f"{processed_data_path}/validation.jsonl"})
+    # tokenized_datasets = dataset.map(_preprocess_function, batched=True, fn_kwargs={"tokenizer": tokenizer})
+    # for split, split_dataset in tokenized_datasets.items():
+    #     split_dataset.to_json(f"{processed_data_path}/{split}.jsonl")
     # until here
-
+    print("Loading Dataset...")
     tokenized_datasets = load_dataset("json", data_files={"train": f"{processed_data_path}/train.jsonl", "validation": f"{processed_data_path}/validation.jsonl"})
     return tokenized_datasets
 
@@ -243,7 +271,6 @@ def main(config_path: str, first_sentences: bool):
         # comment this if you are NOT training the model for the first time:
         if config["pretrained_model"]:
             tokenizer.add_tokens(['_' + str(i) for i in range(20)])
-
         tokenized_datasets = preprocess_dataset(first_sentences, config["preprocessed_data_path"], config["processed_data_path"], config["MAX_LENGTH"], tokenizer)
         args, model, data_collator = trainer_prepare(tokenizer, config["model_path"], config["MAX_LENGTH"], config["train_conf"])
 
@@ -268,7 +295,7 @@ def main(config_path: str, first_sentences: bool):
 
         print("Start training")
         trainer.train() # add resume_from_checkpoint=True if you want to resume training exactly from last checkpoint (save)
-        trainer.save_model(config["save_model_to_path"])
+        trainer.save_model(fix_path(config["save_model_to_path"]))
 
 
     except (ValueError, FileNotFoundError) as e:

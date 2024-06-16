@@ -1,5 +1,5 @@
 {
-    "model_path": "royweiss1/T5-FirstSentences",
+    "model_path": "royweiss1/T5_FirstSentences",
     "pretrained_model": false,
     "save_model_to_path": "/models/first_sentences",
 
@@ -7,9 +7,9 @@
     "processed_data_path": "data/processed/",
     
     "MAX_LENGTH": 80,
-    "BATCH_SIZE": 64,
 
     "train_conf": {
+        "BATCH_SIZE": 64,
         "epochs": 25,
         "learning_rate": 3e-5,
         "weight_decay": 0.001,
@@ -18,6 +18,6 @@
         "logging_steps": 1000,
         "save_total_limit": 2
     },
-    "_comment": "If training middle sentences, change 'model_path' to 'royweiss1/T5-MiddleSentences' or whatever other model you want to fine-tune.",
+    "_comment": "If training middle sentences, change 'model_path' to 'royweiss1/T5_MiddleSentences' or whatever other model you want to fine-tune.",
     "__comment": "Also mind that the 'MAX_LENGTH' should be larger because the input is 2 sentences (context and current)."
 }
