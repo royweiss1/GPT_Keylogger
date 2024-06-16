@@ -10,8 +10,6 @@ This is the official repository for the code used in the paper:
 
 If you use any derivative of this code in your work, please cite our publicaiton. You can find a BibTex citation below.
 
-For more details you can view a preprint of our paper:
-[here](https://arxiv.org/abs/2403.09751)
 
 # Description
 Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**. Imagine awkwardly asking your AI about a strange rash, or to edit an email, only to have that conversation exposed to someone on the net. In this repository we demonstrate how our unvailed side channel can be used to read encrypted messages sent from AI Assistants. The figure below shows the general idea of the Side Channel:
@@ -119,17 +117,19 @@ python GPT_Keylogger.py --generate config/generation_config.json
 ### Train ###
 This module is composed of 2 modules. As described in our paper our framework is compoed of 2 T5 models which have been fine tuned for different missions. We took the desired paragraph and divided it into sentences. The first sentences was passed into the model which was fined tuned on the first sentences. The i_th (i>1) was passed into the second model which was trained on 'middle' sentences. The i_th sentences was given as input with the (i-1)_th setences as context. This way we have build an entire paragraph.
 
-In this module we offer the user the to train a model for this task. The user must supply a configuration file, which can be found at `config/training_first_config.json` or at `config/training_middle_config.json`.
+In this module we offer the user the to train a model for this task. The user must supply a configuration file, which can be found at `config/training_config.json`.
 
 For training the first sentences:
 
+☝🏻 **Make Sure you have setup the train.json and validation.json in the correct path spesified at the configuration file.**
+
 ```
-python GPT_Keylogger.py --train-first-sentences config/generation_config.json
-python GPT_Keylogger.py -tf config/generation_config.json
+python GPT_Keylogger.py --train-first-sentences config/training_config.json
+python GPT_Keylogger.py -tf config/training_config.json
 ```
 ```
-python GPT_Keylogger.py --train-middle-sentences config/generation_config.json
-python GPT_Keylogger.py -tm config/generation_config.json
+python GPT_Keylogger.py --train-middle-sentences config/training_config.json
+python GPT_Keylogger.py -tm config/training_config.json
 ```
 
 ## Examples
