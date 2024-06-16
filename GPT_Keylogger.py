@@ -6,7 +6,7 @@ import argparse
 import sys
 import os
 import scripts.generate as generate
-import scripts.plug_play as plug_play
+import scripts.playground as playground
 
 # silent warnings:
 import warnings
@@ -14,13 +14,13 @@ warnings.filterwarnings("ignore", message="A NumPy version >=1.17.3 and <1.25.0 
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Plug & Play. Use the latter for trying the framework out.")
+    parser = argparse.ArgumentParser(description="Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Playground. Use the latter for trying the framework out.")
     
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--train-first-sentences', '-tf', metavar='<configuration file>', type=str, help="Train the framework's first sentences model, with a configuration file.")
     group.add_argument('--train-middle-sentences', '-tm', metavar='<configuration file>', type=str, help="Train the framework's middle sentences model, with a configuration file.")
     group.add_argument('--generate', '-g', metavar='<configuration file>', type=str, help="Generate mode is used to evaluate the framework, with a configuration file.")
-    group.add_argument('--play', '-p', action='store_true', help="Plug and Play mode, use the framework for specific samples. No configuration file is needed.")
+    group.add_argument('--playground', '-p', action='store_true', help="Playground mode, use the framework for specific samples. No configuration file is needed.")
     
     return parser.parse_args()
 
@@ -46,7 +46,7 @@ def main():
         generate.main(args.generate)
         
     elif args.play:
-        plug_play.main()
+        playground.main()
 
 
 if __name__ == '__main__':

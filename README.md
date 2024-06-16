@@ -27,7 +27,7 @@ We unveil a novel token-length side-channel. The attack relays on the fact that 
 ## Contents
 1) Setup - Simple installation of required libraries
 2) General Usage:
-   * Plug & Play Module
+   * Playground Module
    * Generate & Evaluate Module
    * Train Module
 3) Examples - From pcap files + A demo video
@@ -42,14 +42,14 @@ pip install -r requirments.txt
 
 ## Usage
 In this repository we offer a CLI tool capabale of:
-1) Plug and Play - Using the framework to decypher a stream of token sizes extracted from a evesdropping the network.
+1) Playground - Using the framework to decypher a stream of token sizes extracted from a evesdropping the network.
 2) Generation & Evaluation - Using the framework on a spesified dataset, and evaluating it's preformance
 3) Train - Training the framework from scrach (pre-trained) or from our proposed models (fine-tune) on a spesified dataset.
 
 For all of the usecases above we also offer python scripts and Jupyter notebooks for you convinience.
 
 ```
-Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Plug & Play. Use the latter for trying the
+Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Playground. Use the latter for trying the
 framework out.
 
 options:
@@ -60,10 +60,10 @@ options:
                         Train the framework's first sentences model, with a configuration file.
   --generate <configuration file>, -g <configuration file>
                         Generate mode is used to evaluate the framework, with a configuration file.
-  --play, -p            Plug and Play mode, use the framework for specific samples. No configuration file is needed.
+  --Playground, -p            Playground mode, use the framework for specific samples. No configuration file is needed.
 ```
 
-### Plug and Play ###
+### Playground ###
 This module is the simplest module. Use it to try out the framework. It can recive two kinds of input:
 1. A sequence of **token** lengths
 2. A sequence of **packet** lengths
@@ -73,10 +73,10 @@ I, I can, I can't, I can't diagnose, I can't diagnose medical .....
 ```
 Use it with:
 ```
-python GPT_Keylogger.py --play
+python GPT_Keylogger.py --Playground
 ```
 
-This module can also be found in the PlugAndPlay.ipynb notebook.
+This module can also be found in the Playground.ipynb notebook.
 
 ### Generation ###
 This module offers full evaluation of our framework against an arbitrary AI Assistent responses dataset. We offer the option to both generate decyphered responses and also evaluate their similarity to the original responses.
