@@ -117,7 +117,6 @@ def read_and_print_csv(csv_file_path):
     print(f"Attack Success Rate, first Sentences: {sum(1 for number in firsts if number[0] > 0.5) / len(firsts) * 100:.2f}%")
     print(f"Precentege of almost Identical Decyphering, first Sentences: {sum(1 for number in firsts if number[0] > 0.9) / len(firsts) * 100:.2f}%")
 
-# read_and_print_pickle("scores.pkl")
 
 def main(generated_output_path: str, generated_metrics_path: str, evaluate_all_metrics: bool):
     calculate_scores(generated_output_path, generated_metrics_path, evaluate_all_metrics)
