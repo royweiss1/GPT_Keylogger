@@ -68,13 +68,6 @@ def decode_text(text):
     return decoded_tokens
 
 
-def apply_token(text):
-    enc = tiktoken.encoding_for_model("gpt-4")
-    tokenized_text = [enc.decode([token]) for token in enc.encode(text)]
-    return tokenized_text
-
-
-
 def concatenate_sentences(answer):
     new_answer = []
     index = 0
@@ -118,7 +111,6 @@ def heuristic_string(answer: str):
     else:
         if tokens_in_streak > 0:
             sentences.append("".join(decoded))
-    answer = concatenate_sentences(answer)
     return sentences
         
 
@@ -149,11 +141,23 @@ def heuristic_list(lengths: list):
     return sentences
 
 
-def make_input(lst_lengths):
-    lst_str = " ".join([f"_{i}" for i in lst_lengths])
-    return f"Translate the Special Tokens to English. \nSpecial Tokens:{lst_str}"
+def _apply_token(text):
+    enc = tiktoken.encoding_for_model("gpt-4")
+    tokenized_text = [enc.decode([token]) for token in enc.encode(text)]
+    list_lengths = [len(token) for token in tokenized_text]
+    return list_lengths
 
+def _encoding_lengths(text):
+    lst = _apply_token(text)
+    row = (map(str, lst))
+    return "".join([" _"+c for c in row])
 
+def make_input_text(sentence):
+    return f'Translate the Special Tokens to English. \nSpecial Tokens:{_encoding_lengths(sentence)}'
+
+def make_input_lengths(lengths):
+    lengths = ["_"+str(x) for x in lengths]
+    return f'Translate the Special Tokens to English. \nSpecial Tokens:{lengths}'
 
 
 def main():
@@ -166,16 +170,18 @@ def main():
         if type_of_input == "1":
             input_str = input("Enter the paragraph or first Sentence: ")
             token_lens = heuristic_string(input_str)[0] # take the first sentence based on the heuristic
+            inputs_to_model = [make_input_text(token_lens)] # output is sorted by the model's confidence!!!
         else:
             input_str = input("Enter the lengths divided by comma (,): ")
             token_lens = [int(x) for x in input_str.split(",")]
             if type_of_input == "3":
                 token_lens = parse_packet_lengths(token_lens)
                 token_lens = heuristic_list(token_lens)[0] # take the first sentence based on the heuristic
-        
+            inputs_to_model = [make_input_lengths(token_lens)] # output is sorted by the model's confidence!!!
+
         print("Token lengths:", token_lens)
         print("Generating first sentences...")
-        outputs = generate_first([make_input(token_lens)]) # output is sorted by the model's confidence!!!
+        outputs = generate_first(inputs_to_model) # output is sorted by the model's confidence!!!
         print("First sentences generated, ranked by the model's confidence:")
         for rank, output in enumerate(outputs):
             print(f"Rank: {rank+1}. Output: {output}")
