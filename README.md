@@ -34,9 +34,9 @@ We unveil a novel token-length side-channel. The attack relays on the fact that 
 
 ## Setup
 ```
-pip install https://github.com/royweiss1/GPT_Keylogger.git
+git clone https://github.com/royweiss1/GPT_Keylogger.git
 cd GPT_Keylogger
-pip install -r requirments.txt
+pip install -r requirements.txt
 ```
 
 

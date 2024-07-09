@@ -45,7 +45,7 @@ def main():
         validate_file_path(args.generate)
         generate.main(args.generate)
         
-    elif args.play:
+    elif args.playground:
         playground.main()
 
 

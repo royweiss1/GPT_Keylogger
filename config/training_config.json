@@ -5,7 +5,6 @@
 
     "preprocessed_data_path": "data/preprocessed/",
     "processed_data_path": "data/processed/",
-    
     "MAX_LENGTH": 80,
 
     "train_conf": {

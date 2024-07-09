@@ -16,10 +16,11 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 def validate_and_read_config(config_path):
     required_fields = {
         "test_dataset_path": str,
-        "generated_path": str,
+        "generated_output_path": str,
         "BATCH_SIZE": int,
 
         "evaluate": bool,
+        "evaluate_all_metrics": bool,
         "generated_metrics_path": str,
 
         "first_sentences_generation_config": {

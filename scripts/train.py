@@ -43,8 +43,8 @@ def validate_and_read_config(config_path):
         "train_conf": {
             "BATCH_SIZE": int,
             "epochs": int,
-            "weight_decay": float,
             "learning_rate": float,
+            "weight_decay": float,
             "generation_num_beams": int,
             
             "logging_steps": int,
