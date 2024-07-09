@@ -6,15 +6,11 @@ from sentence_transformers import SentenceTransformer
 from accelerate import Accelerator
 import torch
 from torch import nn
-import pickle
-import csv
 
 def format_floats(float_dict):
     return {key: f"{value:.4f}" for key, value in float_dict.items()}
 
-
 def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to_compare, evaluate_all_metrics):
-
     embed_pred = model_sentence_transformers.encode([sentence_to_compare], convert_to_tensor=True)
     embed_reference = model_sentence_transformers.encode([reference_sentence], convert_to_tensor=True)
 
@@ -23,7 +19,8 @@ def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to
     sen_trans_score = cos(embed_pred, embed_reference)
     cosine_score = tuple(sen_trans_score.detach().cpu().numpy())
     if not evaluate_all_metrics:
-        return format_floats([cosine_score[0]])
+        return format_floats({"Cosine": cosine_score[0]})
+    
     rouge = evaluate.load('rouge')
     rouge_results = rouge.compute(predictions=[sentence_to_compare], references=[reference_sentence], use_aggregator=False)
     rouge_L = rouge_results["rougeL"][0]
@@ -36,8 +33,7 @@ def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to
     ref_set, comp_set = set(ref.split()), set(comp.split())
     jac = float(len(ref_set & comp_set)) / len(ref_set | comp_set)
         
-    return format_floats({"Cosine":cosine_score[0], "Rouge1":rouge_1, "RougeL":rouge_L, "Edit Distance":ed, "Jaccard":jac})
-
+    return format_floats({"Cosine": cosine_score[0], "Rouge1": rouge_1, "RougeL": rouge_L, "Edit Distance": ed, "Jaccard": jac})
 
 def calculate_scores(csv_file_path, output_csv_path, evaluate_all_metrics, start_idx=0, end_idx=None, checkpoint_interval=500):
     # Load the combined CSV file
@@ -46,7 +42,6 @@ def calculate_scores(csv_file_path, output_csv_path, evaluate_all_metrics, start
     print("-------Device:", accelerator.device, "-------")
     model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
     model_sentence_transformers = model_sentence_transformers.to(accelerator.device) 
-
 
     df = pd.read_csv(csv_file_path)
 
@@ -57,9 +52,7 @@ def calculate_scores(csv_file_path, output_csv_path, evaluate_all_metrics, start
     # Initialize a list to hold all other scores
     csv_rows = []
 
-
     for paragraph_idx in tqdm(range(start_idx, end_idx), desc="Processing rows: "):
-        
         reference_para = []
         generated_para = []
         
@@ -86,40 +79,26 @@ def calculate_scores(csv_file_path, output_csv_path, evaluate_all_metrics, start
                     }
                     csv_rows.append(row)
 
-
         # Save the checkpoint
         if (paragraph_idx + 1) % checkpoint_interval == 0:
-            fieldnames = csv_rows[0].keys()
-            with open(output_csv_path, 'w', newline='') as output_file:
-                writer = csv.DictWriter(output_file, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(csv_rows)
+            df_checkpoint = pd.DataFrame(csv_rows)
+            df_checkpoint.to_csv(output_csv_path, index=False)
 
-
-    fieldnames = csv_rows[0].keys()
-    with open(output_csv_path, 'w', newline='') as output_file:
-        writer = csv.DictWriter(output_file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(csv_rows)
+    df_final = pd.DataFrame(csv_rows)
+    df_final.to_csv(output_csv_path, index=False)
 
     print(f"Results saved to {output_csv_path}")
 
-
-
-# here you can run statistical analysis on the scores
 def read_and_print_csv(csv_file_path):
     # Load the CSV file
     df = pd.read_csv(csv_file_path)
 
-    # take those who Sentence=0
+    # take those where Sentence is 0
     firsts = df[df["Sentence"] == 0]["Cosine"].values
 
-    print(f"Attack Success Rate, first Sentences: {sum(1 for number in firsts if number[0] > 0.5) / len(firsts) * 100:.2f}%")
-    print(f"Precentege of almost Identical Decyphering, first Sentences: {sum(1 for number in firsts if number[0] > 0.9) / len(firsts) * 100:.2f}%")
-
+    print(f"Attack Success Rate, first Sentences: {sum(1 for number in firsts if number > 0.5) / len(firsts) * 100:.2f}%")
+    print(f"Percentage of almost Identical Deciphering, first Sentences: {sum(1 for number in firsts if number > 0.9) / len(firsts) * 100:.2f}%")
 
 def main(generated_output_path: str, generated_metrics_path: str, evaluate_all_metrics: bool):
     calculate_scores(generated_output_path, generated_metrics_path, evaluate_all_metrics)
     read_and_print_csv(generated_metrics_path)
-
-
