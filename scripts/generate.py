@@ -1,4 +1,4 @@
-import torch
+from torch import cuda
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, logging
 import pandas as pd
 from accelerate import Accelerator
@@ -109,7 +109,7 @@ def _generate_first(encodings: list[str], first_sentences_model_name: str, MAX_L
     first_tokenizer = AutoTokenizer.from_pretrained(first_sentences_model_name)
 
     accelerator = Accelerator(cpu=False)
-    torch.cuda.empty_cache()
+    cuda.empty_cache()
     # print("--------- Device:", accelerator.device, "---------")
     first_model = first_model.to(accelerator.device)
 
@@ -206,7 +206,7 @@ def generate_first_custom(test_set: pd.DataFrame, batch_size: int, generated_pat
 
 
 def _generate_with_context(encodings: list[str], middle_sentences_model_name: str, MAX_LENGTH: int, top_k: int, num_beam_groups: int, num_beams: int, length_penalty: float, no_repeat_ngram_size: int, diversity_penalty: float):
-    torch.cuda.empty_cache()
+    cuda.empty_cache()
     accelerator = Accelerator(cpu=False)
     # print("--------- Device:", accelerator.device, "---------")
 

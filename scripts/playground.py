@@ -1,6 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from accelerate import Accelerator
-import torch
+from torch import cuda
 import tiktoken
 import regex as re
 
@@ -15,7 +15,7 @@ def generate_first(encodings):
     first_model = AutoModelForSeq2SeqLM.from_pretrained(first_model_checkpoint)
     first_tokenizer = AutoTokenizer.from_pretrained(first_model_checkpoint)
 
-    torch.cuda.empty_cache()
+    cuda.empty_cache()
     accelerator = Accelerator(cpu=False)
     print("-------Device:", accelerator.device)
     first_model = first_model.to(accelerator.device)

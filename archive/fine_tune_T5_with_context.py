@@ -1,4 +1,4 @@
-import torch
+from torch import cuda, nn, mean
 from datasets import load_dataset
 import pandas as pd
 import evaluate
@@ -11,7 +11,7 @@ import Levenshtein
 import tiktoken
 import json
 
-torch.cuda.empty_cache()
+cuda.empty_cache()
 model_checkpoint = "t5-base"
 MAX_LENGTH = 180
 
@@ -141,9 +141,9 @@ def compute_metrics(eval_pred):
     model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
     embed_preds = model_sentence_transformers.encode(decoded_preds, convert_to_tensor=True)
     embed_labels = model_sentence_transformers.encode(decoded_labels, convert_to_tensor=True)
-    cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
+    cos = nn.CosineSimilarity(dim=1, eps=1e-6)
     outputs = cos(embed_preds, embed_labels)
-    result["sentence-transformer"] = torch.mean(outputs, dim=0).item()
+    result["sentence-transformer"] = mean(outputs, dim=0).item()
 
     result["edit_distance"] = np.mean([(max(len(pred), len(label)) - Levenshtein.distance(pred, label)) / max(len(pred), len(label)) for pred, label in zip(decoded_preds, decoded_labels)])
 
@@ -154,8 +154,8 @@ def compute_metrics(eval_pred):
 tokenized_datasets = preprocess_dataset()
 args, model, data_collator = trainer_prepare()
 
-if torch.cuda.is_available():
-    print("Using GPU:", torch.cuda.get_device_name())
+if cuda.is_available():
+    print("Using GPU:", cuda.get_device_name())
 else:
     print("GPU is not available. Please check your configuration.")
 

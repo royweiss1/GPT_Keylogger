@@ -13,7 +13,7 @@ import re
 from sentence_transformers import SentenceTransformer
 import Levenshtein
 import evaluate
-import torch
+from torch import nn, cuda, mean
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
 import pandas as pd
 from accelerate import Accelerator
@@ -245,9 +245,9 @@ def compute_metrics(eval_pred, tokenizer):
     model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
     embed_preds = model_sentence_transformers.encode(decoded_preds, convert_to_tensor=True)
     embed_labels = model_sentence_transformers.encode(decoded_labels, convert_to_tensor=True)
-    cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
+    cos = nn.CosineSimilarity(dim=1, eps=1e-6)
     outputs = cos(embed_preds, embed_labels)
-    result["sentence-transformer"] = torch.mean(outputs, dim=0).item()
+    result["sentence-transformer"] = mean(outputs, dim=0).item()
     
     result["edit_distance"] = np.mean([(max(len(pred), len(label)) - Levenshtein.distance(pred, label)) / max(len(pred), len(label)) for pred, label in zip(decoded_preds, decoded_labels)])
 
@@ -274,8 +274,8 @@ def main(config_path: str, first_sentences: bool):
         tokenized_datasets = preprocess_dataset(first_sentences, config["preprocessed_data_path"], config["processed_data_path"], config["MAX_LENGTH"], tokenizer)
         args, model, data_collator = trainer_prepare(tokenizer, config["model_path"], config["MAX_LENGTH"], config["train_conf"])
 
-        if torch.cuda.is_available():
-            print("Using GPU:", torch.cuda.get_device_name())
+        if cuda.is_available():
+            print("Using GPU:", cuda.get_device_name())
         else:
             print("GPU is not available. Please check your configuration.")
 

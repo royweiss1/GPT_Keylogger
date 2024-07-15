@@ -4,8 +4,7 @@ import evaluate
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 from accelerate import Accelerator
-import torch
-from torch import nn
+from torch import nn, cuda
 
 def format_floats(float_dict):
     return {key: f"{value:.4f}" for key, value in float_dict.items()}
@@ -38,7 +37,7 @@ def compute_metrics(model_sentence_transformers, reference_sentence, sentence_to
 def calculate_scores(csv_file_path, output_csv_path, evaluate_all_metrics, start_idx=0, end_idx=None, checkpoint_interval=500):
     # Load the combined CSV file
     accelerator = Accelerator(cpu=False)
-    torch.cuda.empty_cache()
+    cuda.empty_cache()
     print("-------Device:", accelerator.device, "-------")
     model_sentence_transformers = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v1')
     model_sentence_transformers = model_sentence_transformers.to(accelerator.device) 
