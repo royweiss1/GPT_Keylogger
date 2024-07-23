@@ -287,11 +287,11 @@ def main(config_path: str):
     
     try:
         config = validate_and_read_config(config_path)
-        # test_set = data_process(config["test_dataset_path"])
-        # generate_first_custom(test_set, config["BATCH_SIZE"], config["generated_output_path"], config["first_sentences_generation_config"])
-        # generate_first_custom_with_context(config["generated_output_path"], config["middle_sentences_generation_config"])
+        test_set = data_process(config["test_dataset_path"])
+        generate_first_custom(test_set, config["BATCH_SIZE"], config["generated_output_path"], config["first_sentences_generation_config"])
+        generate_first_custom_with_context(config["generated_output_path"], config["middle_sentences_generation_config"])
         if config["evaluate"]:
-            evaluate_script.main(config["generated_output_path"], config["generated_metrics_path"], config["evaluate_all_metrics"])
+            evaluate_script.main(config["generated_output_path"], config["generated_metrics_path"], config["evaluate_all_metrics"], config["processors_count"])
 
     except (ValueError, FileNotFoundError) as e:
         print(f"Configuration error: {e}")
