@@ -22,6 +22,7 @@ def validate_and_read_config(config_path):
         "evaluate": bool,
         "evaluate_all_metrics": bool,
         "generated_metrics_path": str,
+        "processors_count": int,
 
         "first_sentences_generation_config": {
             "first_sentences_model_name": str,
