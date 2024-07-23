@@ -185,23 +185,22 @@ def generate_first_custom(test_set: pd.DataFrame, batch_size: int, generated_pat
     
     batch_split = create_batches(first_sentences_inputs, batch_size)
     
-    batch_count = 0
     generated_results = []
-
-    for batch in tqdm(batch_split[batch_count:], desc="batch progress: "):  # batch is a list
+    total_batches = len(batch_split)
+    
+    for batch_count, batch in enumerate(tqdm(batch_split, desc="batch progress: ")):  # batch is a list
         sentences_generated = _generate_first(batch, **generate_config)
         generated_results += sentences_generated  # list batch_size long
     
-        batch_count += 1
-        if batch_count % checkpoint_interval == 0:
-            test_set['Generated_0'] = generated_results[:len(test_set)]
+        if (batch_count + 1) % checkpoint_interval == 0 or (batch_count + 1) == total_batches:
+            current_length = len(generated_results)
+            if 'Generated_0' in test_set:
+                test_set['Generated_0'].iloc[:current_length] = generated_results[:current_length]
+            else:
+                test_set['Generated_0'] = pd.Series(generated_results[:current_length])
+
             test_set.to_csv(generated_path, index=False)
-            print(f"Checkpoint saved at {generated_path}")
-    
-    if batch_count % checkpoint_interval != 0:
-        test_set['Generated_0'] = generated_results[:len(test_set)]
-        test_set.to_csv(generated_path, index=False)
-        print(f"Final results saved at {generated_path}")
+            print(f"Checkpoint saved at {generated_path}, batch {batch_count + 1}")
 
 
 
@@ -288,9 +287,9 @@ def main(config_path: str):
     
     try:
         config = validate_and_read_config(config_path)
-        test_set = data_process(config["test_dataset_path"])
-        generate_first_custom(test_set, config["BATCH_SIZE"], config["generated_output_path"], config["first_sentences_generation_config"])
-        generate_first_custom_with_context(config["generated_output_path"], config["middle_sentences_generation_config"])
+        # test_set = data_process(config["test_dataset_path"])
+        # generate_first_custom(test_set, config["BATCH_SIZE"], config["generated_output_path"], config["first_sentences_generation_config"])
+        # generate_first_custom_with_context(config["generated_output_path"], config["middle_sentences_generation_config"])
         if config["evaluate"]:
             evaluate_script.main(config["generated_output_path"], config["generated_metrics_path"], config["evaluate_all_metrics"])
 
