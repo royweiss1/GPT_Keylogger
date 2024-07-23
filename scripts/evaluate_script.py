@@ -137,7 +137,7 @@ def main(generated_output_path: str, generated_metrics_path: str, evaluate_all_m
         csv_file_path=generated_output_path,
         output_csv_path=generated_metrics_path,
         evaluate_all_metrics=evaluate_all_metrics,
-        num_processes=4,
+        num_processes=num_processes,
         checkpoint_interval=500
     )
 
