@@ -1,25 +1,25 @@
 <a name="readme-top"></a>
 
 # GPT Keylogger
-In this repository you will find a python implementation of a tool for deciphering encypeted responses sent from AI assistants (such as ChatGPT, Copilot, ...).
+In this repository you will find a python implementation of a tool for deciphering encrypted responses sent from AI assistants (such as ChatGPT, Copilot, ...).
 
 This is the official repository for the code used in the paper:
 ["What Was Your Prompt? A Remote Keylogging Attack on AI Assistants"](https://arxiv.org/abs/2403.09751), USENIX Security 24'
 
 *Weiss R, Ayzenshteyn D, Amit G, Mirsky Y "What Was Your Prompt? A Remote Keylogging Attack on AI Assistants", USNIX Security 24*
 
-If you use any derivative of this code in your work, please cite our publicaiton. You can find a BibTex citation below.
+If you use any derivative of this code in your work, please cite our publication. You can find a BibTex citation below.
 
 
 # Description
-Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**. Imagine awkwardly asking your AI about a strange rash, or to edit an email, only to have that conversation exposed to someone on the net. In this repository we demonstrate how our unvailed side channel can be used to read encrypted messages sent from AI Assistants. The figure below shows the general idea of the Side Channel:
+Many modern LLM (AI assitant) services are vulnerable to a side channel attack that enables eavesdropping adversaries to read responses from the **service even though they are encrytped**. Imagine awkwardly asking your AI about a strange rash, or to edit an email, only to have that conversation exposed to someone on the net. In this repository we demonstrate how our unveiled side channel can be used to read encrypted messages sent from AI Assistants. The figure below shows the general idea of the Side Channel:
 
 ![image](https://github.com/royweiss1/GPT_Keylogger/assets/92648019/9c9f1bce-1bf2-4f02-902d-47249bf48a9c)
 
-We unveil a novel token-length side-channel. The attack relays on the fact that LLM Services sends their responses to the users in a streaming like manner. If each token (akin to word) is sent carelessly in a new packet, a MitM adversary that listens to the generated network can infer the size of the tokens of the AI Assistent response. With this information in hand we show how a model can be trained to infer the topic of the asked response.
+We unveil a novel token-length side-channel. The attack relies on the fact that LLM Services sends their responses to the users in a streaming-like manner. If each token (akin to a word) is sent carelessly in a new packet, a MitM adversary that listens to the generated network can infer the size of the tokens of the AI Assistent response. With this information in hand we show how a model can be trained to infer the topic of the asked response.
 
 ## Features
-* Our models were trained on GPT-4 responses - Note that using it on a different LLM might cause worse results (due to different tokenizer and diffrent pattern of responses)
+* Our models were trained on GPT-4 responses - note that using it on a different LLM might cause worse results (due to different tokenizer and diffrent pattern of responses)
 * Our model was trained using the UltraChat dataset. Using it on different datasets that includes different topics might lead to lower results.
 
 💡 **Note: The tool in this repository does not operate on network captures (e.g., pcaps). You must extract and provide the token sequences yourself**
@@ -43,10 +43,10 @@ pip install -r requirements.txt
 ## Usage
 In this repository we offer a CLI tool capabale of:
 1) Playground - Using the framework to decypher a stream of token sizes extracted from a evesdropping the network.
-2) Generation & Evaluation - Using the framework on a spesified dataset, and evaluating it's preformance
-3) Train - Training the framework from scrach (pre-trained) or from our proposed models (fine-tune) on a spesified dataset.
+2) Generation & Evaluation - Using the framework on a specified dataset, and evaluating it's performance
+3) Train - Training the framework from scrach (pre-trained) or from our proposed models (fine-tune) on a specified dataset.
 
-For all of the usecases above we also offer python scripts and Jupyter notebooks for you convinience.
+For all of the use cases above we also offer python scripts and Jupyter notebooks for you convenience.
 
 ```
 Welcome to the GPT Keylogger Framework. We offer several modes: Train, Generate, and Playground. Use the latter for trying the
@@ -64,7 +64,7 @@ options:
 ```
 
 ### Playground ###
-This module is the simplest module. Use it to try out the framework. It can recive two kinds of input:
+This module is the simplest module. Use it to try out the framework. It can receive two kinds of input:
 1. A sequence of **token** lengths
 2. A sequence of **packet** lengths
 The difference is that packet lengths are taken straight up from the pcap file. They are incremental, meaning the response is beeing build up over the stream of packets. For example, the packets may contain:
@@ -79,18 +79,18 @@ python GPT_Keylogger.py --Playground
 This module can also be found in the Playground.ipynb notebook.
 
 ### Generation ###
-This module offers full evaluation of our framework against an arbitrary AI Assistent responses dataset. We offer the option to both generate decyphered responses and also evaluate their similarity to the original responses.
+This module offers full evaluation of our framework against an arbitrary AI Assistant responses dataset. We offer the option to both generate deciphered responses and also evaluate their similarity to the original responses.
 
-Note: Use this module if you wish to repreduce our results from the paper, using the default configuration file.
+Note: Use this module if you wish to reproduce our results from the paper, using the default configuration file.
 
-To use it you need to spesify a generation-configuration file (an example could be found under `config/generation_config.json`). In the config file there are spesifications on:
+To use it you need to specify a generation-configuration file (an example could be found under `config/generation_config.json`). In the config file there are spesifications on:
 - What path should the results be saved to.
 - What model should be used.
 - What hyperparameters should be used to generated the responses using the models.
 
-We offer a default configuration file for you ease of use.
+We offer a default configuration file for your ease of use.
 
-The only requerment is that the dataset that is used will follow the following format:
+The only requirement is that the dataset must follow the following format:
 ```
 {
     "paragraphs": [
@@ -105,7 +105,7 @@ The only requerment is that the dataset that is used will follow the following f
     ]
 }
 ```
-The partition to sentences may be done using a hueristic we propose (on `archive/hueristic.ipynb`).
+The partition to sentences may be done using a heuristic we propose (on `archive/hueristic.ipynb`).
 
 We offer the test set that was used in our paper at: `data\test.json`. It also avaliable at huggingface with the rest of the dataset: [here](https://huggingface.co/datasets/royweiss1/GPT_Keylogger_Dataset)
 
@@ -121,7 +121,7 @@ In this module we offer the user the to train a model for this task. The user mu
 
 For training the first sentences:
 
-☝🏻 **Make Sure you have setup the train.json and validation.json in the correct path spesified at the configuration file.**
+☝🏻 **Make sure you have setup the train.json and validation.json in the correct path spesified at the configuration file.**
 
 ```
 python GPT_Keylogger.py --train-first-sentences config/training_config.json
