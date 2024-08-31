@@ -4,7 +4,7 @@
 In this repository you will find a python implementation of a tool for deciphering encrypted responses sent from AI assistants (such as ChatGPT, Copilot, ...).
 
 This is the official repository for the code used in the paper:
-["What Was Your Prompt? A Remote Keylogging Attack on AI Assistants"](https://arxiv.org/abs/2403.09751), USENIX Security 24'
+["What Was Your Prompt? A Remote Keylogging Attack on AI Assistants"](https://www.usenix.org/conference/usenixsecurity24/presentation/weiss), USENIX Security 24'
 
 *Weiss R, Ayzenshteyn D, Amit G, Mirsky Y "What Was Your Prompt? A Remote Keylogging Attack on AI Assistants", USNIX Security 24*
 
